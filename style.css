@@ -1,198 +1,152 @@
-@media (max-width: 700px) {
+/* =========================================================
+   FINAL CENTER ALIGNMENT
+========================================================= */
 
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-  }
+html,
+body {
+  text-align: center;
+}
 
-  /* Very compact header */
-  .site-header {
-    padding: 7px 5px;
-  }
+.site-header,
+.site-header h1 {
+  text-align: center;
+}
 
-  .site-header h1 {
-    font-size: 18px;
-    line-height: 1.15;
-  }
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
 
-  .container {
-    margin: 4px auto 0;
-    padding: 0 5px 10px;
-  }
+.controls-card {
+  text-align: center;
+}
 
-  /* Compact control area */
-  .controls-card {
-    padding: 5px;
-    border-radius: 7px;
-    box-shadow: none;
-  }
+.selectors,
+.navigation {
+  margin-left: auto;
+  margin-right: auto;
+}
 
-  /* Language + Year */
-  .selectors {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    margin: 0;
-  }
+.selector-group,
+.selector-group label,
+select,
+button {
+  text-align: center;
+}
 
-  .selector-group label {
-    margin: 0 0 1px;
-    font-size: 9px;
-    line-height: 1;
-  }
+.font-controls,
+.offline-controls {
+  justify-content: center;
+  text-align: center;
+}
 
-  select {
-    width: 100%;
-    height: 28px;
-    padding: 0 5px;
-    font-size: 11px;
-    border-radius: 5px;
-  }
+.status {
+  text-align: center;
+}
 
-  /* Navigation */
-  .navigation {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 3px;
-    margin: 4px 0 0;
-  }
+.watchword-content {
+  width: 100%;
+  text-align: center;
+}
 
-  .navigation button {
-    height: 28px;
-    padding: 0 2px;
-    font-size: 10px;
-    border-radius: 5px;
-  }
+.entry {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
 
-  /* Font controls */
-  .font-controls {
-    margin: 3px auto 0;
-    gap: 4px;
-    height: 25px;
-  }
-
-  .font-controls button {
-    width: 27px;
-    height: 25px;
-    padding: 0;
-    font-size: 15px;
-    border-radius: 5px;
-  }
-
-  #fontSizeLabel {
-    min-width: 38px;
-    font-size: 9px;
-  }
-
-  /* Save Offline takes almost no space */
-  .offline-controls {
-    margin: 2px auto 0;
-  }
-
-  #offlineBtn {
-    min-width: 0;
-    width: auto;
-    height: 23px;
-    padding: 0 8px;
-    font-size: 9px;
-    border-radius: 5px;
-  }
-
-  /* Completely minimize status area */
-  .status {
-    padding: 0;
-    margin: 0;
-    min-height: 0;
-    font-size: 9px;
-  }
-
-  /* Reading area */
-  .entry {
-    width: 100%;
-    max-width: 100%;
-    margin: 4px auto 0;
-    padding: 5px 2px 10px;
-    border-top: 1px solid #ddd;
-  }
-
-  /* Heading */
-  .entry-heading {
-    margin: 0 0 5px;
-    font-size: 14px;
-    line-height: 1.2;
-    font-weight: 400;
-  }
-
-  /* Date */
-  .date {
-    margin: 0 0 6px;
-    font-size: 14px;
-    line-height: 1.2;
-    font-weight: 800;
-  }
-
-  /* Watchword */
-  .watchword-line {
-    margin: 0 0 7px;
-    font-size: 14px;
-    line-height: 1.25;
-  }
-
-  /* Scripture readings */
-  .readings {
-    margin: 0 0 7px;
-    font-size: 12px;
-    line-height: 1.25;
-  }
-
-  /* Bible text */
-  .reader-paragraph {
-    margin: 0 0 7px;
-    font-size: 14px;
-    line-height: 1.25;
-  }
-
-  /* Special titles */
-  .special {
-    margin: 5px 0;
-    padding: 0;
-    font-size: 14px;
-    line-height: 1.25;
-    background: transparent;
-    border: 0;
-  }
-
-  .reference {
-    font-size: 12px;
-    font-weight: 400;
-    font-style: italic;
-  }
+.entry-heading,
+.date,
+.watchword-line,
+.readings,
+.reader-paragraph,
+.special,
+.reference {
+  text-align: center;
 }
 
 
-/* Very small phones */
-@media (max-width: 380px) {
+/* =========================================================
+   CENTER ALL TEXT INSIDE THE DAILY ENTRY
+========================================================= */
+
+.entry * {
+  text-align: center;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .site-header {
+    text-align: center;
+  }
 
   .site-header h1 {
-    font-size: 16px;
+    text-align: center;
+  }
+
+  .container {
+    text-align: center;
+  }
+
+  .controls-card {
+    text-align: center;
+  }
+
+  .selectors {
+    text-align: center;
+  }
+
+  .selector-group {
+    text-align: center;
+  }
+
+  .selector-group label {
+    text-align: center;
+  }
+
+  select {
+    text-align: center;
+    text-align-last: center;
+  }
+
+  .navigation {
+    text-align: center;
+  }
+
+  .navigation button {
+    text-align: center;
+  }
+
+  .font-controls {
+    justify-content: center;
+  }
+
+  .offline-controls {
+    justify-content: center;
+  }
+
+  .entry {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .entry-heading,
   .date,
   .watchword-line,
+  .readings,
   .reader-paragraph,
   .special {
-    font-size: 13px;
+    text-align: center;
   }
 
-  .readings,
-  .reference {
-    font-size: 11px;
-  }
-
-  .reader-paragraph {
-    line-height: 1.2;
+  .entry * {
+    text-align: center;
   }
 }
