@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Moravian Daily Watchwords</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <h1>Moravian Daily Watchwords</h1>
+  </header>
+
+  <main class="container">
+
+    <section class="controls-card">
+
+      <div class="selectors">
+
+        <div class="selector-group">
+          <label for="language">Language</label>
+          <select id="language">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+
+        <div class="selector-group">
+          <label for="year">Year</label>
+          <select id="year">
+            <option value="">Loading...</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="navigation">
+
+        <button id="previousBtn" type="button">
+          ← Previous
+        </button>
+
+        <button id="todayBtn" type="button" class="today-button">
+          Today
+        </button>
+
+        <button id="nextBtn" type="button">
+          Next →
+        </button>
+
+      </div>
+
+      <div class="font-controls">
+
+        <button
+          id="fontDownBtn"
+          type="button"
+          aria-label="Decrease font size">
+          −
+        </button>
+
+        <span id="fontSizeLabel">100%</span>
+
+        <button
+          id="fontUpBtn"
+          type="button"
+          aria-label="Increase font size">
+          +
+        </button>
+
+      </div>
+
+      <div class="offline-controls">
+        <button id="offlineBtn" type="button">
+          💾 Save Offline
+        </button>
+      </div>
+
+      <div id="status" class="status">
+        Loading Watchword files...
+      </div>
+
+    </section>
+
+    <section id="watchwordContent" class="watchword-content">
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+
+</body>
+</html>
