@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="theme-color" content="#121826">
+  <meta name="description" content="Moravian Daily Watchwords">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Moravian Daily Watchwords</title>
-
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
   <header class="site-header">
     <h1>Moravian Daily Watchwords</h1>
   </header>
 
   <main class="container">
-
     <section class="controls-card">
-
       <div class="selectors">
-
         <div class="selector-group">
           <label for="language">Language</label>
           <select id="language">
@@ -34,62 +33,63 @@
             <option value="">Loading...</option>
           </select>
         </div>
-
       </div>
 
       <div class="navigation">
-
-        <button id="previousBtn" type="button">
-          ← Previous
-        </button>
-
-        <button id="todayBtn" type="button" class="today-button">
-          Today
-        </button>
-
-        <button id="nextBtn" type="button">
-          Next →
-        </button>
-
+        <button id="previousBtn" type="button">← Previous</button>
+        <button id="todayBtn" type="button" class="today-button">Today</button>
+        <button id="nextBtn" type="button">Next →</button>
       </div>
 
-      <div class="font-controls">
+      <div class="reading-tools">
+        <div class="calendar-wrap">
+          <button id="calendarBtn" type="button" class="calendar-button" aria-expanded="false">
+            📅 Calendar
+          </button>
 
-        <button
-          id="fontDownBtn"
-          type="button"
-          aria-label="Decrease font size">
-          −
-        </button>
+          <div id="calendarPanel" class="calendar-panel" hidden>
+            <div class="calendar-panel-top">
+              <button id="calendarPrevMonth" type="button" aria-label="Previous month">‹</button>
+              <strong id="calendarMonthTitle">Month</strong>
+              <button id="calendarNextMonth" type="button" aria-label="Next month">›</button>
+            </div>
 
-        <span id="fontSizeLabel">100%</span>
+            <div class="calendar-weekdays">
+              <span>Sun</span>
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+            </div>
 
-        <button
-          id="fontUpBtn"
-          type="button"
-          aria-label="Increase font size">
-          +
-        </button>
+            <div id="calendarDays" class="calendar-days"></div>
 
+            <div class="calendar-panel-bottom">
+              <button id="calendarTodayBtn" type="button">Go to Today</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="font-controls">
+          <button id="fontDownBtn" type="button" aria-label="Decrease font size">−</button>
+          <span id="fontSizeLabel">100%</span>
+          <button id="fontUpBtn" type="button" aria-label="Increase font size">+</button>
+        </div>
       </div>
 
       <div class="offline-controls">
-        <button id="offlineBtn" type="button">
-          💾 Save Offline
-        </button>
+        <button id="offlineBtn" type="button">💾 Save Offline</button>
+        <button id="installBtn" type="button" class="install-button" hidden>📲 Install App</button>
       </div>
 
-      <div id="status" class="status">
-        Loading Watchword files...
-      </div>
-
+      <div id="status" class="status">Loading Watchword files...</div>
     </section>
 
-    <section id="watchwordContent" class="watchword-content">
-    </section>
-
+    <section id="watchwordContent" class="watchword-content"></section>
   </main>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js"></script>
 </body>
 </html>
