@@ -1,25 +1,24 @@
 /* =========================================================
    MORAVIAN DAILY WATCHWORDS
-   FINAL RESPONSIVE STYLE
+   SIMPLE TXT DISPLAY STYLE
 ========================================================= */
 
 * {
   box-sizing: border-box;
 }
 
-html {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
-
+html,
 body {
   margin: 0;
   padding: 0;
 
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
 
+  text-align: center;
+}
+
+body {
   background: #f5f6f9;
   color: #17233a;
 
@@ -27,8 +26,6 @@ body {
     Arial,
     Helvetica,
     sans-serif;
-
-  text-align: center;
 }
 
 
@@ -44,7 +41,8 @@ body {
 
   text-align: center;
 
-  padding: 22px 12px 20px;
+  padding:
+    22px 12px 20px;
 }
 
 .site-header h1 {
@@ -69,9 +67,11 @@ body {
   width: 100%;
   max-width: 980px;
 
-  margin: 24px auto 0;
+  margin:
+    24px auto 0;
 
-  padding: 0 16px 40px;
+  padding:
+    0 16px 50px;
 
   text-align: center;
 }
@@ -116,7 +116,8 @@ body {
 
   gap: 10px;
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
   text-align: center;
 }
@@ -130,7 +131,8 @@ body {
 .selector-group label {
   display: block;
 
-  margin: 0 0 5px;
+  margin:
+    0 0 5px;
 
   color: #667085;
 
@@ -143,9 +145,11 @@ body {
 
 select {
   width: 100%;
+
   height: 42px;
 
-  padding: 0 10px;
+  padding:
+    0 10px;
 
   border:
     1px solid #ccd2dc;
@@ -187,7 +191,6 @@ button {
   text-align: center;
 
   transition:
-    background 0.15s ease,
     opacity 0.15s ease,
     transform 0.1s ease;
 }
@@ -223,7 +226,8 @@ button:disabled {
 
   gap: 8px;
 
-  margin: 10px auto 0;
+  margin:
+    10px auto 0;
 
   text-align: center;
 }
@@ -257,7 +261,8 @@ button:disabled {
 
   gap: 8px;
 
-  margin: 9px auto 0;
+  margin:
+    9px auto 0;
 
   text-align: center;
 }
@@ -294,11 +299,12 @@ button:disabled {
 .offline-controls {
   display: flex;
 
-  justify-content: center;
-
   align-items: center;
 
-  margin: 8px auto 0;
+  justify-content: center;
+
+  margin:
+    8px auto 0;
 
   text-align: center;
 }
@@ -310,7 +316,8 @@ button:disabled {
 
   height: 36px;
 
-  padding: 0 15px;
+  padding:
+    0 15px;
 
   background: #f7f8fa;
 
@@ -333,18 +340,22 @@ button:disabled {
 .status {
   width: 100%;
 
-  text-align: center;
-
-  color: #667085;
-
   padding:
     8px 5px 2px;
 
+  color: #667085;
+
   font-size: 13px;
+
+  text-align: center;
 }
 
 .error {
   width: 100%;
+
+  padding: 12px;
+
+  margin-top: 10px;
 
   background: #fff2f2;
 
@@ -354,10 +365,6 @@ button:disabled {
   border-radius: 10px;
 
   color: #9b1c1c;
-
-  padding: 12px;
-
-  margin-top: 10px;
 
   white-space: pre-wrap;
 
@@ -372,7 +379,8 @@ button:disabled {
 .watchword-content {
   width: 100%;
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
   text-align: center;
 }
@@ -387,178 +395,71 @@ button:disabled {
 
   max-width: 900px;
 
-  margin: 18px auto 0;
+  margin:
+    18px auto 0;
 
   padding:
     18px 12px 30px;
 
   border-top:
+    1px solid #dfe3e8;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   TXT LINE
+========================================================= */
+
+/*
+   Every non-empty line from the TXT file
+   becomes one block.
+
+   The text itself is NOT changed.
+
+   A small divider separates the lines.
+*/
+
+.txt-line {
+  width: 100%;
+
+  margin:
+    0 auto;
+
+  padding:
+    0 4px 14px;
+
+  margin-bottom:
+    14px;
+
+  border-bottom:
     1px solid #e5e7eb;
 
-  text-align: center;
-}
-
-
-/* =========================================================
-   DAILY HEADING
-   NORMAL
-========================================================= */
-
-.entry-heading {
-  width: 100%;
-
-  margin:
-    0 0 12px;
-
-  font-size:
-    var(--reader-size, 18px);
-
-  font-weight: 400;
-
-  line-height: 1.45;
-
-  text-align: center;
-}
-
-
-/* =========================================================
-   DATE
-   BOLD
-========================================================= */
-
-.date {
-  width: 100%;
-
-  margin:
-    0 0 16px;
-
-  font-size:
-    var(--reader-size, 18px);
-
-  font-weight: 800;
-
-  line-height: 1.45;
-
-  text-align: center;
-}
-
-
-/* =========================================================
-   WATCHWORD
-========================================================= */
-
-.watchword-line {
-  width: 100%;
-
-  margin:
-    0 0 20px;
-
   font-size:
     var(--reader-size, 18px);
 
   line-height: 1.55;
 
-  text-align: center;
-}
-
-.watchword-line strong {
-  font-weight: 800;
-}
-
-
-/* =========================================================
-   SCRIPTURE READINGS
-   ITALIC, NOT BOLD
-========================================================= */
-
-.readings {
-  width: 100%;
-
-  margin:
-    0 0 20px;
-
-  font-size:
-    var(--reader-size, 18px);
-
   font-weight: 400;
 
-  font-style: italic;
-
-  line-height: 1.55;
-
   text-align: center;
+
+  overflow-wrap: anywhere;
 }
 
 
-/* =========================================================
-   NORMAL / BIBLE TEXT
-========================================================= */
+/*
+   Don't put a divider after
+   the final line.
+*/
 
-.reader-paragraph {
-  width: 100%;
+.txt-line:last-child {
+  border-bottom: none;
 
-  margin:
-    0 0 20px;
+  margin-bottom: 0;
 
-  font-size:
-    var(--reader-size, 18px);
-
-  font-weight: 400;
-
-  line-height: 1.6;
-
-  text-align: center;
-}
-
-
-/* =========================================================
-   BIBLE VERSE
-   TEXT BOLD
-========================================================= */
-
-.reader-paragraph strong {
-  font-weight: 800;
-}
-
-
-/* =========================================================
-   BIBLE REFERENCE
-   ITALIC ONLY
-========================================================= */
-
-.reference {
-  font-weight: 400;
-
-  font-style: italic;
-
-  white-space: normal;
-}
-
-
-/* =========================================================
-   SPECIAL TITLE
-========================================================= */
-
-.special {
-  width: 100%;
-
-  margin:
-    14px 0 20px;
-
-  padding: 0;
-
-  background: transparent;
-
-  border: 0;
-
-  font-size:
-    var(--reader-size, 18px);
-
-  font-weight: 400;
-
-  line-height: 1.55;
-
-  text-align: center;
+  padding-bottom: 0;
 }
 
 
@@ -586,7 +487,7 @@ button:disabled {
       7px auto 0;
 
     padding:
-      0 6px 18px;
+      0 6px 25px;
   }
 
 
@@ -619,7 +520,8 @@ button:disabled {
   select {
     height: 31px;
 
-    padding: 0 5px;
+    padding:
+      0 5px;
 
     border-radius: 6px;
 
@@ -646,7 +548,8 @@ button:disabled {
   .navigation button {
     height: 31px;
 
-    padding: 0 3px;
+    padding:
+      0 3px;
 
     border-radius: 6px;
 
@@ -693,7 +596,8 @@ button:disabled {
 
     height: 27px;
 
-    padding: 0 8px;
+    padding:
+      0 8px;
 
     border-radius: 6px;
 
@@ -716,63 +620,18 @@ button:disabled {
     margin-top: 5px;
 
     padding:
-      8px 3px 16px;
+      9px 3px 18px;
   }
 
 
-  .entry-heading {
-    margin-bottom: 9px;
+  /* TXT lines */
 
-    font-size:
-      var(--reader-size, 16px);
+  .txt-line {
+    padding:
+      0 4px 11px;
 
-    line-height: 1.4;
-  }
-
-
-  .date {
-    margin-bottom: 11px;
-
-    font-size:
-      var(--reader-size, 16px);
-
-    line-height: 1.4;
-  }
-
-
-  .watchword-line {
-    margin-bottom: 15px;
-
-    font-size:
-      var(--reader-size, 16px);
-
-    line-height: 1.45;
-  }
-
-
-  .readings {
-    margin-bottom: 15px;
-
-    font-size:
-      var(--reader-size, 16px);
-
-    line-height: 1.45;
-  }
-
-
-  .reader-paragraph {
-    margin-bottom: 15px;
-
-    font-size:
-      var(--reader-size, 16px);
-
-    line-height: 1.45;
-  }
-
-
-  .special {
-    margin:
-      10px 0 15px;
+    margin-bottom:
+      11px;
 
     font-size:
       var(--reader-size, 16px);
@@ -792,13 +651,11 @@ button:disabled {
     font-size: 18px;
   }
 
-  .entry-heading,
-  .date,
-  .watchword-line,
-  .readings,
-  .reader-paragraph,
-  .special {
+
+  .txt-line {
     font-size:
       var(--reader-size, 15px);
+
+    line-height: 1.4;
   }
 }
