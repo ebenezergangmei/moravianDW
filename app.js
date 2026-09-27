@@ -217,13 +217,11 @@ function getFileName(file) {
 }
 
 function parseFileInfo(file) {
-  const name =
-    getFileName(file);
+  const name = getFileName(file);
 
-  const match =
-    name.match(
-      /^(.+?)\s+(\d{4})\.txt$/i
-    );
+  const match = name.match(
+    /^(\d{4})\s+(.+?)\.txt$/i
+  );
 
   if (!match) {
     return null;
@@ -231,8 +229,8 @@ function parseFileInfo(file) {
 
   return {
     name,
-    language: match[1].trim(),
-    year: Number(match[2])
+    year: Number(match[1]),
+    language: match[2].trim()
   };
 }
 
