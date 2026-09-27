@@ -500,6 +500,35 @@ async function goToday() {
   renderCalendar();
 }
 
+previousBtn.addEventListener(
+  "click",
+  function() {
+    moveDate(-1);
+  }
+);
+
+nextBtn.addEventListener(
+  "click",
+  function() {
+    moveDate(1);
+  }
+);
+
+languageSelect.addEventListener(
+  "change",
+  selectionChanged
+);
+
+yearSelect.addEventListener(
+  "change",
+  selectionChanged
+);
+
+todayBtn.addEventListener(
+  "click",
+  goToday
+);
+
 async function selectionChanged() {
   selectedLanguage =
     languageSelect.value;
