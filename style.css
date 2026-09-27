@@ -229,30 +229,145 @@ button:active {
 
 @media (max-width: 700px) {
 
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .site-header {
+    padding: 10px 8px;
+  }
+
+  .site-header h1 {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
   .container {
-    margin: 18px auto;
-    padding: 0 10px 35px;
+    margin: 8px auto 0;
+    padding: 0 7px 20px;
   }
 
   .controls-card {
-    padding: 16px;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: none;
   }
 
+  /* Language + Year on ONE row */
   .selectors {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 0;
   }
 
+  .selector-group label {
+    margin-bottom: 2px;
+    font-size: 11px;
+  }
+
+  select {
+    height: 34px;
+    padding: 0 7px;
+    font-size: 13px;
+    border-radius: 7px;
+  }
+
+  /* Previous / Today / Next on ONE row */
   .navigation {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+    margin: 6px 0 0;
   }
 
+  .navigation button {
+    height: 34px;
+    padding: 0 4px;
+    font-size: 12px;
+    border-radius: 7px;
+  }
+
+  /* Font controls */
+  .font-controls {
+    margin: 5px auto 0;
+    gap: 5px;
+  }
+
+  .font-controls button {
+    width: 32px;
+    height: 30px;
+    font-size: 17px;
+    border-radius: 7px;
+  }
+
+  #fontSizeLabel {
+    min-width: 45px;
+    font-size: 11px;
+  }
+
+  /* Keep Save Offline very small */
+  .offline-controls {
+    margin: 4px auto 0;
+  }
+
+  #offlineBtn {
+    min-width: 110px;
+    width: auto;
+    height: 29px;
+    padding: 0 10px;
+    font-size: 11px;
+    border-radius: 7px;
+  }
+
+  /* Remove unnecessary status space */
+  .status {
+    padding: 2px;
+    font-size: 11px;
+  }
+
+  /* Daily Watchword starts quickly */
   .entry {
-    margin-top: 18px;
-    padding: 18px 4px 25px;
+    margin-top: 8px;
+    padding: 10px 3px 20px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .entry-heading {
+    margin-bottom: 8px;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.35;
   }
 
   .date {
-    font-size: 20px;
+    margin-bottom: 10px;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.35;
   }
 
+  .watchword-line {
+    margin-bottom: 12px;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.45;
+  }
+
+  .readings {
+    margin-bottom: 12px;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.45;
+  }
+
+  .reader-paragraph {
+    margin-bottom: 12px;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.45;
+  }
+
+  .special {
+    margin: 8px 0;
+    font-size: var(--reader-size, 18px);
+    line-height: 1.45;
+  }
 }
