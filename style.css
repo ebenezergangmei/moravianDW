@@ -16,13 +16,17 @@ html {
 body {
   margin: 0;
   padding: 0;
+
   width: 100%;
   min-height: 100vh;
 
   background: #f5f6f9;
   color: #17233a;
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
 
   text-align: center;
 }
@@ -46,7 +50,9 @@ body {
 .site-header h1 {
   margin: 0;
 
-  font-size: clamp(24px, 4vw, 40px);
+  font-size:
+    clamp(24px, 4vw, 40px);
+
   line-height: 1.15;
 
   font-weight: 800;
@@ -80,11 +86,14 @@ body {
 
   background: #ffffff;
 
-  border: 1px solid #e0e3e9;
+  border:
+    1px solid #e0e3e9;
+
   border-radius: 16px;
 
   box-shadow:
-    0 10px 28px rgba(20, 30, 50, 0.08);
+    0 10px 28px
+    rgba(20, 30, 50, 0.08);
 
   padding: 18px;
 
@@ -102,7 +111,8 @@ body {
 
   display: grid;
 
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    1fr 1fr;
 
   gap: 10px;
 
@@ -113,6 +123,7 @@ body {
 
 .selector-group {
   width: 100%;
+
   text-align: center;
 }
 
@@ -124,6 +135,7 @@ body {
   color: #667085;
 
   font-size: 13px;
+
   font-weight: 700;
 
   text-align: center;
@@ -135,15 +147,19 @@ select {
 
   padding: 0 10px;
 
-  border: 1px solid #ccd2dc;
+  border:
+    1px solid #ccd2dc;
+
   border-radius: 9px;
 
   background: #ffffff;
+
   color: #17233a;
 
   font-size: 15px;
 
   text-align: center;
+
   text-align-last: center;
 }
 
@@ -153,13 +169,17 @@ select {
 ========================================================= */
 
 button {
-  border: 1px solid #ccd2dc;
+  border:
+    1px solid #ccd2dc;
+
   border-radius: 9px;
 
   background: #ffffff;
+
   color: #111827;
 
   font-size: 15px;
+
   font-weight: 700;
 
   cursor: pointer;
@@ -177,17 +197,19 @@ button:hover {
 }
 
 button:active {
-  transform: translateY(1px);
+  transform:
+    translateY(1px);
 }
 
 button:disabled {
   opacity: 0.45;
+
   cursor: default;
 }
 
 
 /* =========================================================
-   PREVIOUS / TODAY / NEXT
+   NAVIGATION
 ========================================================= */
 
 .navigation {
@@ -208,14 +230,17 @@ button:disabled {
 
 .navigation button {
   width: 100%;
+
   height: 42px;
 }
 
 .today-button {
   background: #121826;
+
   color: #ffffff;
 
-  border-color: #121826;
+  border-color:
+    #121826;
 }
 
 
@@ -227,6 +252,7 @@ button:disabled {
   display: flex;
 
   align-items: center;
+
   justify-content: center;
 
   gap: 8px;
@@ -238,11 +264,13 @@ button:disabled {
 
 .font-controls button {
   width: 42px;
+
   height: 38px;
 
   padding: 0;
 
   font-size: 22px;
+
   line-height: 1;
 }
 
@@ -252,6 +280,7 @@ button:disabled {
   color: #667085;
 
   font-size: 13px;
+
   font-weight: 700;
 
   text-align: center;
@@ -259,13 +288,14 @@ button:disabled {
 
 
 /* =========================================================
-   OFFLINE BUTTON
+   OFFLINE
 ========================================================= */
 
 .offline-controls {
   display: flex;
 
   justify-content: center;
+
   align-items: center;
 
   margin: 8px auto 0;
@@ -275,6 +305,7 @@ button:disabled {
 
 #offlineBtn {
   width: auto;
+
   min-width: 145px;
 
   height: 36px;
@@ -306,7 +337,8 @@ button:disabled {
 
   color: #667085;
 
-  padding: 8px 5px 2px;
+  padding:
+    8px 5px 2px;
 
   font-size: 13px;
 }
@@ -316,7 +348,9 @@ button:disabled {
 
   background: #fff2f2;
 
-  border: 1px solid #e5a3a3;
+  border:
+    1px solid #e5a3a3;
+
   border-radius: 10px;
 
   color: #9b1c1c;
@@ -350,13 +384,16 @@ button:disabled {
 
 .entry {
   width: 100%;
+
   max-width: 900px;
 
   margin: 18px auto 0;
 
-  padding: 18px 12px 30px;
+  padding:
+    18px 12px 30px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top:
+    1px solid #e5e7eb;
 
   text-align: center;
 }
@@ -364,15 +401,17 @@ button:disabled {
 
 /* =========================================================
    DAILY HEADING
-   NORMAL WEIGHT
+   NORMAL
 ========================================================= */
 
 .entry-heading {
   width: 100%;
 
-  margin: 0 0 12px;
+  margin:
+    0 0 12px;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   font-weight: 400;
 
@@ -390,9 +429,11 @@ button:disabled {
 .date {
   width: 100%;
 
-  margin: 0 0 14px;
+  margin:
+    0 0 16px;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   font-weight: 800;
 
@@ -409,9 +450,11 @@ button:disabled {
 .watchword-line {
   width: 100%;
 
-  margin: 0 0 16px;
+  margin:
+    0 0 20px;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   line-height: 1.55;
 
@@ -425,21 +468,23 @@ button:disabled {
 
 /* =========================================================
    SCRIPTURE READINGS
-   NOT BOLD
+   ITALIC, NOT BOLD
 ========================================================= */
 
 .readings {
   width: 100%;
 
-  margin: 0 0 17px;
+  margin:
+    0 0 20px;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   font-weight: 400;
 
   font-style: italic;
 
-  line-height: 1.5;
+  line-height: 1.55;
 
   text-align: center;
 }
@@ -452,29 +497,26 @@ button:disabled {
 .reader-paragraph {
   width: 100%;
 
-  margin: 0 0 16px;
+  margin:
+    0 0 20px;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   font-weight: 400;
 
-  line-height: 1.55;
+  line-height: 1.6;
 
   text-align: center;
 }
 
 
 /* =========================================================
-   BIBLE VERSE TEXT
-   ONLY THE VERSE IS BOLD
+   BIBLE VERSE
+   TEXT BOLD
 ========================================================= */
 
-.verse-text {
-  font-weight: 400;
-  text-align: center;
-}
-
-.verse-text strong {
+.reader-paragraph strong {
   font-weight: 800;
 }
 
@@ -494,13 +536,14 @@ button:disabled {
 
 
 /* =========================================================
-   SPECIAL TITLES
+   SPECIAL TITLE
 ========================================================= */
 
 .special {
   width: 100%;
 
-  margin: 12px 0;
+  margin:
+    14px 0 20px;
 
   padding: 0;
 
@@ -508,11 +551,12 @@ button:disabled {
 
   border: 0;
 
-  font-size: var(--reader-size, 18px);
+  font-size:
+    var(--reader-size, 18px);
 
   font-weight: 400;
 
-  line-height: 1.5;
+  line-height: 1.55;
 
   text-align: center;
 }
@@ -525,17 +569,21 @@ button:disabled {
 @media (max-width: 700px) {
 
   .site-header {
-    padding: 9px 6px 8px;
+    padding:
+      9px 6px 8px;
   }
+
 
   .site-header h1 {
     font-size: 20px;
+
     line-height: 1.15;
   }
 
 
   .container {
-    margin: 7px auto 0;
+    margin:
+      7px auto 0;
 
     padding:
       0 6px 18px;
@@ -551,7 +599,7 @@ button:disabled {
   }
 
 
-  /* Language + Year */
+  /* Language / Year */
 
   .selectors {
     grid-template-columns:
@@ -578,6 +626,7 @@ button:disabled {
     font-size: 12px;
 
     text-align: center;
+
     text-align-last: center;
   }
 
@@ -616,6 +665,7 @@ button:disabled {
 
   .font-controls button {
     width: 30px;
+
     height: 29px;
 
     border-radius: 6px;
@@ -651,6 +701,8 @@ button:disabled {
   }
 
 
+  /* Status */
+
   .status {
     padding: 1px;
 
@@ -665,69 +717,67 @@ button:disabled {
 
     padding:
       8px 3px 16px;
-
-    border-top:
-      1px solid #e5e7eb;
   }
 
 
   .entry-heading {
-    margin-bottom: 7px;
+    margin-bottom: 9px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.3;
+    line-height: 1.4;
   }
 
 
   .date {
-    margin-bottom: 8px;
+    margin-bottom: 11px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.3;
+    line-height: 1.4;
   }
 
 
   .watchword-line {
-    margin-bottom: 9px;
+    margin-bottom: 15px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
 
   .readings {
-    margin-bottom: 9px;
+    margin-bottom: 15px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
 
   .reader-paragraph {
-    margin-bottom: 9px;
+    margin-bottom: 15px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
 
   .special {
-    margin: 7px 0;
+    margin:
+      10px 0 15px;
 
     font-size:
       var(--reader-size, 16px);
 
-    line-height: 1.35;
+    line-height: 1.45;
   }
 }
 
@@ -741,7 +791,6 @@ button:disabled {
   .site-header h1 {
     font-size: 18px;
   }
-
 
   .entry-heading,
   .date,
