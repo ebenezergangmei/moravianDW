@@ -227,13 +227,17 @@ button:active {
 
 /* Mobile */
 
-@media (max-width: 700px) {
-
-  html,
-  body {
-    margin: 0;
-    padding: 0;
+@media (max-width: 450px) {
+  .entry-heading,
+  .date,
+  .watchword-line,
+  .readings,
+  .reader-paragraph,
+  .special {
+    font-size: 16px;
+    line-height: 1.4;
   }
+}
 
   .site-header {
     padding: 10px 8px;
