@@ -1,2 +1,2 @@
 # moravianDW
-Multilingual Moravian Daily Watchwords for Blogspot.com (moraviandw.blogspot.com
+Multilingual Moravian Daily Watchwords for Blogspot.com (moraviandw.blogspot.com).
