@@ -1138,7 +1138,8 @@ if (installBtn) {
   installBtn.addEventListener(
     "click",
     async () => {
-      if (!deferredInstallPrompt) {
+     if (!deferredInstallPrompt) {
+        alert("Please use your browser's menu and choose 'Install App' or 'Add to Home Screen'.");
         return;
       }
 
