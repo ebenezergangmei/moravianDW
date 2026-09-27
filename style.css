@@ -1,661 +1,500 @@
 /* =========================================================
    MORAVIAN DAILY WATCHWORDS
-   SIMPLE TXT DISPLAY STYLE
+   TXT DISPLAY + CALENDAR + PWA
 ========================================================= */
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
-
   width: 100%;
   min-height: 100%;
-
   text-align: center;
 }
 
 body {
   background: #f5f6f9;
   color: #17233a;
-
-  font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
-
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .site-header {
   width: 100%;
-
   background: #121826;
   color: #ffffff;
-
   text-align: center;
-
-  padding:
-    22px 12px 20px;
+  padding: 22px 12px 20px;
 }
 
 .site-header h1 {
   margin: 0;
-
-  font-size:
-    clamp(24px, 4vw, 40px);
-
+  font-size: clamp(24px, 4vw, 40px);
   line-height: 1.15;
-
   font-weight: 800;
-
   text-align: center;
 }
-
-
-/* =========================================================
-   MAIN CONTAINER
-========================================================= */
 
 .container {
   width: 100%;
   max-width: 980px;
-
-  margin:
-    24px auto 0;
-
-  padding:
-    0 16px 50px;
-
+  margin: 24px auto 0;
+  padding: 0 16px 50px;
   text-align: center;
 }
-
-
-/* =========================================================
-   CONTROL CARD
-========================================================= */
 
 .controls-card {
   width: 100%;
-
   background: #ffffff;
-
-  border:
-    1px solid #e0e3e9;
-
+  border: 1px solid #e0e3e9;
   border-radius: 16px;
-
-  box-shadow:
-    0 10px 28px
-    rgba(20, 30, 50, 0.08);
-
+  box-shadow: 0 10px 28px rgba(20, 30, 50, 0.08);
   padding: 18px;
-
   text-align: center;
 }
-
-
-/* =========================================================
-   LANGUAGE + YEAR
-========================================================= */
 
 .selectors {
   width: 100%;
   max-width: 900px;
-
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-
-  margin:
-    0 auto;
-
+  margin: 0 auto;
   text-align: center;
 }
 
 .selector-group {
   width: 100%;
-
   text-align: center;
 }
 
 .selector-group label {
   display: block;
-
-  margin:
-    0 0 5px;
-
+  margin: 0 0 5px;
   color: #667085;
-
   font-size: 13px;
-
   font-weight: 700;
-
   text-align: center;
 }
 
 select {
   width: 100%;
-
   height: 42px;
-
-  padding:
-    0 10px;
-
-  border:
-    1px solid #ccd2dc;
-
+  padding: 0 10px;
+  border: 1px solid #ccd2dc;
   border-radius: 9px;
-
   background: #ffffff;
-
   color: #17233a;
-
   font-size: 15px;
-
   text-align: center;
-
   text-align-last: center;
 }
 
-
-/* =========================================================
-   BUTTONS
-========================================================= */
-
 button {
-  border:
-    1px solid #ccd2dc;
-
+  border: 1px solid #ccd2dc;
   border-radius: 9px;
-
   background: #ffffff;
-
   color: #111827;
-
   font-size: 15px;
-
   font-weight: 700;
-
   cursor: pointer;
-
   text-align: center;
-
-  transition:
-    opacity 0.15s ease,
-    transform 0.1s ease;
+  transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
-button:hover {
-  opacity: 0.92;
-}
-
-button:active {
-  transform:
-    translateY(1px);
-}
-
-button:disabled {
-  opacity: 0.45;
-
-  cursor: default;
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
+button:hover { opacity: 0.92; }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: 0.45; cursor: default; }
 
 .navigation {
   width: 100%;
   max-width: 900px;
-
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr 1fr;
-
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
-
-  margin:
-    10px auto 0;
-
+  margin: 10px auto 0;
   text-align: center;
 }
 
 .navigation button {
   width: 100%;
-
   height: 42px;
 }
 
 .today-button {
   background: #121826;
-
   color: #ffffff;
-
-  border-color:
-    #121826;
+  border-color: #121826;
 }
 
+/* Calendar sits beside the font controls on larger screens. */
+.reading-tools {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  margin: 9px auto 0;
+  text-align: center;
+}
 
-/* =========================================================
-   FONT CONTROLS
-========================================================= */
+.calendar-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.calendar-button {
+  height: 38px;
+  min-width: 112px;
+  padding: 0 12px;
+  background: #f7f8fa;
+}
+
+.calendar-panel {
+  position: absolute;
+  z-index: 20;
+  top: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 315px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #d7dce5;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(20, 30, 50, 0.16);
+}
+
+.calendar-panel[hidden] {
+  display: none;
+}
+
+.calendar-panel-top {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+
+.calendar-panel-top button {
+  width: 38px;
+  height: 32px;
+  padding: 0;
+  font-size: 21px;
+}
+
+.calendar-panel-top strong {
+  font-size: 15px;
+}
+
+.calendar-weekdays,
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-weekdays span {
+  color: #667085;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 0;
+}
+
+.calendar-days button {
+  width: 100%;
+  height: 34px;
+  padding: 0;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.calendar-days .empty {
+  height: 34px;
+}
+
+.calendar-days button.selected-day {
+  background: #121826;
+  color: #ffffff;
+  border-color: #121826;
+}
+
+.calendar-days button.today-day {
+  box-shadow: inset 0 0 0 2px #7d8798;
+}
+
+.calendar-panel-bottom {
+  margin-top: 9px;
+}
+
+.calendar-panel-bottom button {
+  width: 100%;
+  height: 32px;
+  font-size: 12px;
+}
 
 .font-controls {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 8px;
-
-  margin:
-    9px auto 0;
-
   text-align: center;
 }
 
 .font-controls button {
   width: 42px;
-
   height: 38px;
-
   padding: 0;
-
   font-size: 22px;
-
   line-height: 1;
 }
 
 #fontSizeLabel {
   min-width: 55px;
-
   color: #667085;
-
   font-size: 13px;
-
   font-weight: 700;
-
   text-align: center;
 }
-
-
-/* =========================================================
-   OFFLINE
-========================================================= */
 
 .offline-controls {
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
-  margin:
-    8px auto 0;
-
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px auto 0;
   text-align: center;
 }
 
-#offlineBtn {
+#offlineBtn,
+.install-button {
   width: auto;
-
   min-width: 145px;
-
   height: 36px;
-
-  padding:
-    0 15px;
-
+  padding: 0 15px;
   background: #f7f8fa;
-
   font-size: 13px;
+}
+
+.install-button {
+  background: #121826;
+  color: #ffffff;
+  border-color: #121826;
 }
 
 #offlineBtn.saved {
   background: #eef8f0;
-
   border-color: #8bc69a;
-
   color: #176b2b;
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
-
 .status {
   width: 100%;
-
-  padding:
-    8px 5px 2px;
-
+  padding: 8px 5px 2px;
   color: #667085;
-
   font-size: 13px;
-
   text-align: center;
 }
 
 .error {
   width: 100%;
-
   padding: 12px;
-
   margin-top: 10px;
-
   background: #fff2f2;
-
-  border:
-    1px solid #e5a3a3;
-
+  border: 1px solid #e5a3a3;
   border-radius: 10px;
-
   color: #9b1c1c;
-
   white-space: pre-wrap;
-
   text-align: center;
 }
-
-
-/* =========================================================
-   WATCHWORD CONTENT
-========================================================= */
 
 .watchword-content {
   width: 100%;
-
-  margin:
-    0 auto;
-
+  margin: 0 auto;
   text-align: center;
 }
-
-
-/* =========================================================
-   DAILY ENTRY
-========================================================= */
 
 .entry {
   width: 100%;
-
   max-width: 900px;
-
-  margin:
-    18px auto 0;
-
-  padding:
-    18px 12px 30px;
-
-  border-top:
-    1px solid #dfe3e8;
-
+  margin: 18px auto 0;
+  padding: 18px 12px 30px;
+  border-top: 1px solid #dfe3e8;
   text-align: center;
 }
-
-
-/* =========================================================
-   TXT LINE
-========================================================= */
-
-/*
-   Every non-empty line from the TXT file
-   becomes one block.
-
-   The text itself is NOT changed.
-
-   A small divider separates the lines.
-*/
 
 .txt-line {
   width: 100%;
-
-  margin:
-    0 auto;
-
-  padding:
-    0 4px 14px;
-
-  margin-bottom:
-    14px;
-
-  border-bottom:
-    1px solid #e5e7eb;
-
-  font-size:
-    var(--reader-size, 18px);
-
+  margin: 0 auto;
+  padding: 0 4px 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: var(--reader-size, 18px);
   line-height: 1.55;
-
   font-weight: 400;
-
   text-align: center;
-
   overflow-wrap: anywhere;
 }
 
-
-/*
-   Don't put a divider after
-   the final line.
-*/
-
 .txt-line:last-child {
   border-bottom: none;
-
   margin-bottom: 0;
-
   padding-bottom: 0;
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
 @media (max-width: 700px) {
-
   .site-header {
-    padding:
-      9px 6px 8px;
+    padding: 9px 6px 8px;
   }
-
 
   .site-header h1 {
     font-size: 20px;
-
     line-height: 1.15;
   }
 
-
   .container {
-    margin:
-      7px auto 0;
-
-    padding:
-      0 6px 25px;
+    margin: 7px auto 0;
+    padding: 0 6px 25px;
   }
-
 
   .controls-card {
     padding: 7px;
-
     border-radius: 9px;
-
     box-shadow: none;
   }
 
-
-  /* Language / Year */
-
   .selectors {
-    grid-template-columns:
-      1fr 1fr;
-
+    grid-template-columns: 1fr 1fr;
     gap: 5px;
   }
-
 
   .selector-group label {
     margin-bottom: 2px;
-
     font-size: 10px;
   }
-
 
   select {
     height: 31px;
-
-    padding:
-      0 5px;
-
+    padding: 0 5px;
     border-radius: 6px;
-
     font-size: 12px;
-
     text-align: center;
-
     text-align-last: center;
   }
 
-
-  /* Navigation */
-
   .navigation {
-    grid-template-columns:
-      1fr 1fr 1fr;
-
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 4px;
-
     margin-top: 5px;
   }
 
-
   .navigation button {
     height: 31px;
-
-    padding:
-      0 3px;
-
+    padding: 0 3px;
     border-radius: 6px;
-
     font-size: 11px;
   }
 
-
-  /* Font controls */
-
-  .font-controls {
+  .reading-tools {
     gap: 5px;
-
     margin-top: 4px;
+    align-items: flex-start;
   }
 
-
-  .font-controls button {
-    width: 30px;
-
+  .calendar-button {
+    min-width: 84px;
     height: 29px;
-
+    padding: 0 6px;
     border-radius: 6px;
-
-    font-size: 18px;
-  }
-
-
-  #fontSizeLabel {
-    min-width: 43px;
-
     font-size: 10px;
   }
 
+  .calendar-panel {
+    top: 34px;
+    width: min(300px, calc(100vw - 24px));
+    padding: 8px;
+    border-radius: 9px;
+  }
 
-  /* Offline */
+  .calendar-days button {
+    height: 30px;
+    font-size: 11px;
+  }
+
+  .calendar-days .empty {
+    height: 30px;
+  }
+
+  .calendar-weekdays span {
+    font-size: 9px;
+  }
+
+  .calendar-panel-top {
+    grid-template-columns: 32px 1fr 32px;
+  }
+
+  .calendar-panel-top button {
+    width: 32px;
+    height: 28px;
+  }
+
+  .font-controls {
+    gap: 5px;
+  }
+
+  .font-controls button {
+    width: 30px;
+    height: 29px;
+    border-radius: 6px;
+    font-size: 18px;
+  }
+
+  #fontSizeLabel {
+    min-width: 43px;
+    font-size: 10px;
+  }
 
   .offline-controls {
     margin-top: 3px;
   }
 
-
-  #offlineBtn {
+  #offlineBtn,
+  .install-button {
     min-width: 105px;
-
     height: 27px;
-
-    padding:
-      0 8px;
-
+    padding: 0 8px;
     border-radius: 6px;
-
     font-size: 10px;
   }
 
-
-  /* Status */
-
   .status {
     padding: 1px;
-
     font-size: 9px;
   }
 
-
-  /* Daily entry */
-
   .entry {
     margin-top: 5px;
-
-    padding:
-      9px 3px 18px;
+    padding: 9px 3px 18px;
   }
 
-
-  /* TXT lines */
-
   .txt-line {
-    padding:
-      0 4px 11px;
-
-    margin-bottom:
-      11px;
-
-    font-size:
-      var(--reader-size, 16px);
-
+    padding: 0 4px 11px;
+    margin-bottom: 11px;
+    font-size: var(--reader-size, 16px);
     line-height: 1.45;
   }
 }
 
-
-/* =========================================================
-   VERY SMALL PHONES
-========================================================= */
-
 @media (max-width: 380px) {
-
   .site-header h1 {
     font-size: 18px;
   }
 
-
   .txt-line {
-    font-size:
-      var(--reader-size, 15px);
-
+    font-size: var(--reader-size, 15px);
     line-height: 1.4;
   }
 }
