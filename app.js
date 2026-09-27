@@ -1,6 +1,13 @@
 // ============================================================
 // MORAVIAN DAILY WATCHWORDS
-// FINAL GITHUB PAGES VERSION
+// SIMPLE TXT DISPLAY VERSION
+//
+// The TXT file is treated as the source of truth.
+// # = beginning of a new daily entry.
+//
+// No Bible-reference parsing.
+// No sentence parsing.
+// No automatic duplicate removal.
 // ============================================================
 
 
@@ -16,7 +23,7 @@ const GITHUB_RAW_BASE =
 
 
 // ============================================================
-// DOM ELEMENTS
+// DOM
 // ============================================================
 
 const languageSelect =
@@ -54,7 +61,7 @@ const contentBox =
 
 
 // ============================================================
-// APPLICATION STATE
+// STATE
 // ============================================================
 
 let files = [];
@@ -75,7 +82,7 @@ let readerScale = Number(
 
 
 // ============================================================
-// BASIC HELPERS
+// HELPERS
 // ============================================================
 
 function escapeHtml(value) {
@@ -169,6 +176,13 @@ function normalizeText(text) {
 
 // ============================================================
 // FILE INFORMATION
+//
+// Expected filenames:
+//
+// 2025 English.txt
+// 2025 Rongmei.txt
+// 2026 English.txt
+// 2026 Rongmei.txt
 // ============================================================
 
 function fileInfo(filename) {
@@ -182,23 +196,17 @@ function fileInfo(filename) {
     return null;
   }
 
-  /*
-    Expected:
-
-    2025 English.txt
-    2025 Rongmei.txt
-    2026 English.txt
-    2026 Rongmei.txt
-  */
 
   const match =
     filename.match(
       /^(\d{4})\s+(.+)\.txt$/i
     );
 
+
   if (!match) {
     return null;
   }
+
 
   return {
     name: filename,
@@ -210,6 +218,11 @@ function fileInfo(filename) {
 
 // ============================================================
 // LOAD FILE LIST
+//
+// GitHub automatically tells us what TXT files are
+// inside /data.
+//
+// Therefore files.json is NOT required.
 // ============================================================
 
 async function loadFileList() {
@@ -217,6 +230,7 @@ async function loadFileList() {
   setStatus(
     "Loading Watchword files..."
   );
+
 
   const response =
     await fetch(
@@ -230,6 +244,7 @@ async function loadFileList() {
       }
     );
 
+
   if (!response.ok) {
 
     throw new Error(
@@ -239,8 +254,10 @@ async function loadFileList() {
     );
   }
 
+
   const items =
     await response.json();
+
 
   files =
     items
@@ -268,6 +285,7 @@ async function loadFileList() {
             );
           }
 
+
           return a.language.localeCompare(
             b.language,
             undefined,
@@ -279,6 +297,7 @@ async function loadFileList() {
         }
       );
 
+
   if (!files.length) {
 
     throw new Error(
@@ -286,12 +305,13 @@ async function loadFileList() {
     );
   }
 
+
   populateSelectors();
 }
 
 
 // ============================================================
-// POPULATE SELECTORS
+// LANGUAGE + YEAR SELECTORS
 // ============================================================
 
 function populateSelectors() {
@@ -306,6 +326,7 @@ function populateSelectors() {
       )
     ].sort();
 
+
   const years =
     [
       ...new Set(
@@ -319,10 +340,12 @@ function populateSelectors() {
         a - b
     );
 
+
   const savedLanguage =
     localStorage.getItem(
       "watchwordLanguage"
     );
+
 
   const savedYear =
     Number(
@@ -331,6 +354,7 @@ function populateSelectors() {
       )
     );
 
+
   selectedLanguage =
     languages.includes(
       savedLanguage
@@ -338,12 +362,14 @@ function populateSelectors() {
       ? savedLanguage
       : languages[0];
 
+
   selectedYear =
     years.includes(
       savedYear
     )
       ? savedYear
       : years[years.length - 1];
+
 
   languageSelect.innerHTML =
     languages
@@ -357,6 +383,7 @@ function populateSelectors() {
       )
       .join("");
 
+
   yearSelect.innerHTML =
     years
       .map(
@@ -365,8 +392,10 @@ function populateSelectors() {
       )
       .join("");
 
+
   languageSelect.value =
     selectedLanguage;
+
 
   yearSelect.value =
     String(selectedYear);
@@ -374,7 +403,7 @@ function populateSelectors() {
 
 
 // ============================================================
-// GET SELECTED FILE
+// GET CURRENT FILE
 // ============================================================
 
 function getSelectedFile() {
@@ -392,13 +421,14 @@ function getSelectedFile() {
 
 
 // ============================================================
-// LOAD SELECTED FILE
+// LOAD SELECTED TXT
 // ============================================================
 
 async function loadSelectedFile() {
 
   const file =
     getSelectedFile();
+
 
   if (!file) {
 
@@ -409,27 +439,33 @@ async function loadSelectedFile() {
     return;
   }
 
+
   selectedLanguage =
     file.language;
 
+
   selectedYear =
     file.year;
+
 
   localStorage.setItem(
     "watchwordLanguage",
     selectedLanguage
   );
 
+
   localStorage.setItem(
     "watchwordYear",
     String(selectedYear)
   );
+
 
   setStatus(
     "Loading " +
     file.name +
     "..."
   );
+
 
   try {
 
@@ -444,6 +480,7 @@ async function loadSelectedFile() {
         }
       );
 
+
     if (!response.ok) {
 
       throw new Error(
@@ -455,27 +492,45 @@ async function loadSelectedFile() {
       );
     }
 
+
     const text =
       await response.text();
 
+
+    /*
+      IMPORTANT:
+
+      The TXT file itself is the source
+      of truth.
+
+      We only split it at #.
+    */
+
     records =
-      parseFile(text);
+      parseFile(
+        text
+      );
+
 
     if (!records.length) {
 
       throw new Error(
-        "No # records found in " +
+        "No # records were found in " +
         file.name
       );
     }
 
+
     setStatus("");
 
+
     displayCurrentDate();
+
 
   } catch (error) {
 
     console.error(error);
+
 
     showError(
       "Could not load " +
@@ -488,9 +543,11 @@ async function loadSelectedFile() {
 
 
 // ============================================================
-// PARSE FILE
+// PARSE TXT
 //
-// Every line beginning with # starts a new day.
+// ONLY # HAS SPECIAL MEANING.
+//
+// Everything inside each # section is kept.
 // ============================================================
 
 function parseFile(text) {
@@ -500,15 +557,28 @@ function parseFile(text) {
       .replace(/\r\n/g, "\n")
       .replace(/\r/g, "\n");
 
+
+  /*
+    Every # begins a new daily entry.
+  */
+
   const blocks =
     normalized.split(
       /^\s*#/m
     );
 
+
   return blocks
     .slice(1)
     .map(
-      (block, index) => {
+      block => {
+
+        /*
+          Keep the original lines.
+
+          We remove only completely empty
+          lines at the beginning/end.
+        */
 
         const lines =
           block
@@ -516,249 +586,72 @@ function parseFile(text) {
             .map(
               line =>
                 line.trim()
-            )
-            .filter(
-              line =>
-                line !== ""
             );
 
+
+        while (
+          lines.length &&
+          lines[0] === ""
+        ) {
+          lines.shift();
+        }
+
+
+        while (
+          lines.length &&
+          lines[
+            lines.length - 1
+          ] === ""
+        ) {
+          lines.pop();
+        }
+
+
         return {
-          dayNumber:
-            index + 1,
           lines
         };
       }
     )
     .filter(
       record =>
-        record.lines.length
+        record.lines.length > 0
     );
 }
 
 
 // ============================================================
-// GET RECORD FOR DATE
+// GET DAILY RECORD
+//
+// Record #1 = January 1
+// Record #2 = January 2
+// etc.
 // ============================================================
 
 function getRecordForDate(date) {
 
+  const index =
+    dayOfYear(date) - 1;
+
+
   return (
-    records[
-      dayOfYear(date) - 1
-    ] || null
+    records[index] ||
+    null
   );
 }
 
 
 // ============================================================
-// DATE DETECTION
-// ============================================================
-
-function looksLikeDateLine(line) {
-
-  const text =
-    line.trim();
-
-  const monthPattern =
-    /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b/i;
-
-  if (!monthPattern.test(text)) {
-    return false;
-  }
-
-  return /\d{1,2}/.test(text);
-}
-
-
-// ============================================================
-// SCRIPTURE READINGS
-// ============================================================
-
-function looksLikeReadings(line) {
-
-  if (!line.includes(";")) {
-    return false;
-  }
-
-  const refs =
-    line.match(
-      /\b\d+:\d+(?:[-–]\d+)?/g
-    );
-
-  return (
-    refs &&
-    refs.length >= 2
-  );
-}
-
-
-// ============================================================
-// SPECIAL TITLES
-// ============================================================
-
-function isSpecialTitle(line) {
-
-  return (
-    /^\*[^*]+\*:/u.test(line) ||
-    /^Good Friday\b/i.test(line) ||
-    /^Maundy Thursday\b/i.test(line)
-  );
-}
-
-
-// ============================================================
-// BIBLE REFERENCE
+// DISPLAY DAILY RECORD
 //
-// Conservative parser.
-// It does NOT swallow the sentence before
-// the Bible reference.
-// ============================================================
-
-function splitBibleReference(line) {
-
-  const text =
-    line.trim();
-
-  /*
-    Recognize the final Bible reference.
-
-    Examples:
-
-    Isaiah 50:9
-    Ezekiel 36:36
-    Romans 8:34
-    John 17:26
-    1 Samuel 30:1
-    1 Korinmei 10:31
-
-    The Bible book is limited to a
-    small number of words and each
-    book word must begin with a capital.
-  */
-
-  const pattern =
-    /((?:[1-3]\s+)?[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’.\-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’.\-]*){0,3}\s+\d+:\d+(?:[-–]\d+)?(?:,\s*\d+(?:[-–]\d+)?)?)$/u;
-
-  const match =
-    text.match(pattern);
-
-  if (!match) {
-    return null;
-  }
-
-  const reference =
-    match[1].trim();
-
-  const verseText =
-    text
-      .slice(
-        0,
-        match.index
-      )
-      .trim();
-
-  if (!verseText) {
-    return null;
-  }
-
-  return {
-    verseText,
-    reference
-  };
-}
-
-
-// ============================================================
-// WATCHWORD PARSER
-// ============================================================
-
-function parseWatchword(line) {
-
-  const match =
-    line.match(
-      /^Watchword\s+for\s+the\s+Week\s*:\s*(.*)$/i
-    );
-
-  if (!match) {
-    return null;
-  }
-
-  /*
-    IMPORTANT:
-    Always create a real string.
-    Never allow undefined to reach
-    the page.
-  */
-
-  const fullText =
-    (match[1] || "").trim();
-
-  if (!fullText) {
-
-    return {
-      text: "",
-      reference: ""
-    };
-  }
-
-  const bible =
-    splitBibleReference(
-      fullText
-    );
-
-  if (bible) {
-
-    return {
-      text:
-        bible.verseText || "",
-      reference:
-        bible.reference || ""
-    };
-  }
-
-  /*
-    If there is no recognizable
-    Bible reference, keep the
-    entire Watchword text.
-  */
-
-  return {
-    text: fullText,
-    reference: ""
-  };
-}
-
-
-// ============================================================
-// REMOVE DUPLICATE HEADING
-// ============================================================
-
-function removeHeadingDuplicate(
-  heading,
-  lines
-) {
-
-  if (!heading) {
-    return lines;
-  }
-
-  const normalizedHeading =
-    normalizeText(
-      heading
-    );
-
-  return lines.filter(
-    line =>
-      normalizeText(
-        line
-      ) !==
-      normalizedHeading
-  );
-}
-
-
-// ============================================================
-// DISPLAY RECORD
+// IMPORTANT:
+//
+// NO Bible parsing.
+// NO heading parsing.
+// NO duplicate removal.
+// NO "undefined".
+// NO automatic interpretation.
+//
+// The TXT lines are simply displayed.
 // ============================================================
 
 function displayRecord(
@@ -780,335 +673,46 @@ function displayRecord(
     return;
   }
 
+
   /*
-    Clean empty lines and
-    consecutive duplicates.
+    Build one paragraph for every
+    non-empty TXT line.
+
+    The content itself is untouched.
   */
-
-  const cleaned = [];
-
-  for (
-    const line of record.lines
-  ) {
-
-    if (!line.trim()) {
-      continue;
-    }
-
-    if (
-      cleaned.length &&
-      normalizeText(
-        cleaned[
-          cleaned.length - 1
-        ]
-      ) ===
-      normalizeText(
-        line
-      )
-    ) {
-      continue;
-    }
-
-    cleaned.push(
-      line.trim()
-    );
-  }
-
-  let lines =
-    cleaned;
-
-
-  // ==========================================================
-  // FIND HEADING / DATE
-  // ==========================================================
-
-  let heading = "";
-
-  let dateLine = "";
-
-  if (lines.length) {
-
-    if (
-      looksLikeDateLine(
-        lines[0]
-      )
-    ) {
-
-      /*
-        Example:
-
-        #Friday, October 9
-      */
-
-      dateLine =
-        lines.shift();
-
-    } else {
-
-      /*
-        Example:
-
-        #Pentecost tangv Ruhna-Chaku Sunday/Neihneic
-      */
-
-      heading =
-        lines.shift();
-    }
-  }
-
-
-  // ==========================================================
-  // REMOVE REPEATED HEADING
-  // ==========================================================
-
-  if (heading) {
-
-    lines =
-      removeHeadingDuplicate(
-        heading,
-        lines
-      );
-  }
-
-
-  // ==========================================================
-  // FIND DATE AFTER HEADING
-  // ==========================================================
-
-  if (!dateLine) {
-
-    for (
-      let i = 0;
-      i < Math.min(
-        lines.length,
-        4
-      );
-      i++
-    ) {
-
-      if (
-        looksLikeDateLine(
-          lines[i]
-        )
-      ) {
-
-        dateLine =
-          lines.splice(
-            i,
-            1
-          )[0];
-
-        break;
-      }
-    }
-  }
-
-
-  // ==========================================================
-  // BUILD HTML
-  // ==========================================================
 
   let html = "";
 
 
-  // ----------------------------------------------------------
-  // HEADING
-  // ----------------------------------------------------------
-
-  if (heading) {
-
-    html +=
-      '<div class="entry-heading">' +
-      escapeHtml(
-        heading
-      ) +
-      "</div>";
-  }
-
-
-  // ----------------------------------------------------------
-  // DATE
-  // ----------------------------------------------------------
-
-  if (dateLine) {
-
-    html +=
-      '<div class="date">' +
-      escapeHtml(
-        dateLine
-      ) +
-      "</div>";
-  }
-
-
-  // ==========================================================
-  // REMAINING LINES
-  // ==========================================================
-
   for (
-    const line of lines
+    let i = 0;
+    i < record.lines.length;
+    i++
   ) {
 
-    // --------------------------------------------------------
-    // WATCHWORD FOR THE WEEK
-    // --------------------------------------------------------
-
-    const watchword =
-      parseWatchword(
-        line
-      );
-
-    if (watchword) {
-
-      html +=
-        '<div class="watchword-line">';
-
-      html +=
-        "<strong>" +
-        "Watchword for the Week:" +
-        "</strong>";
+    const line =
+      record.lines[i];
 
 
-      if (watchword.text) {
+    /*
+      Ignore only empty lines.
 
-        html +=
-          " " +
-          "<strong>" +
-          escapeHtml(
-            watchword.text
-          ) +
-          "</strong>";
-      }
-
-
-      if (watchword.reference) {
-
-        html +=
-          " " +
-          '<span class="reference">' +
-          escapeHtml(
-            watchword.reference
-          ) +
-          "</span>";
-      }
-
-
-      html +=
-        "</div>";
-
-      continue;
-    }
-
-
-    // --------------------------------------------------------
-    // DON'T DISPLAY ANOTHER DATE
-    // --------------------------------------------------------
+      We do NOT alter the text.
+    */
 
     if (
-      looksLikeDateLine(
-        line
-      )
+      line.trim() === ""
     ) {
       continue;
     }
 
-
-    // --------------------------------------------------------
-    // SCRIPTURE READINGS
-    // --------------------------------------------------------
-
-    if (
-      looksLikeReadings(
-        line
-      )
-    ) {
-
-      html +=
-        '<div class="readings">' +
-        escapeHtml(
-          line
-        ) +
-        "</div>";
-
-      continue;
-    }
-
-
-    // --------------------------------------------------------
-    // SPECIAL TITLE
-    // --------------------------------------------------------
-
-    if (
-      isSpecialTitle(
-        line
-      )
-    ) {
-
-      const special =
-        line.replace(
-          /^\*|\*$/g,
-          ""
-        );
-
-      html +=
-        '<div class="special">' +
-        escapeHtml(
-          special
-        ) +
-        "</div>";
-
-      continue;
-    }
-
-
-    // --------------------------------------------------------
-    // BIBLE VERSE
-    // --------------------------------------------------------
-
-    const bible =
-      splitBibleReference(
-        line
-      );
-
-    if (bible) {
-
-      html +=
-        '<div class="reader-paragraph">' +
-
-        "<strong>" +
-        escapeHtml(
-          bible.verseText
-        ) +
-        "</strong> " +
-
-        '<span class="reference">' +
-        escapeHtml(
-          bible.reference
-        ) +
-        "</span>" +
-
-        "</div>";
-
-      continue;
-    }
-
-
-    // --------------------------------------------------------
-    // NORMAL TEXT
-    // --------------------------------------------------------
 
     html +=
-      '<div class="reader-paragraph">' +
-      escapeHtml(
-        line
-      ) +
+      '<div class="txt-line">' +
+      escapeHtml(line) +
       "</div>";
   }
 
-
-  // ==========================================================
-  // FINAL ENTRY
-  // ==========================================================
 
   contentBox.innerHTML =
     '<article class="entry">' +
@@ -1128,10 +732,12 @@ function displayCurrentDate() {
       currentDate
     );
 
+
   displayRecord(
     record,
     currentDate
   );
+
 
   updateNavigationButtons();
 }
@@ -1148,10 +754,12 @@ function moveDate(days) {
       currentDate
     );
 
+
   newDate.setDate(
     newDate.getDate() +
     days
   );
+
 
   if (
     newDate.getFullYear() !==
@@ -1160,8 +768,10 @@ function moveDate(days) {
     return;
   }
 
+
   currentDate =
     newDate;
+
 
   displayCurrentDate();
 }
@@ -1176,6 +786,7 @@ function goToday() {
   const today =
     new Date();
 
+
   if (
     today.getFullYear() ===
     Number(selectedYear)
@@ -1186,6 +797,12 @@ function goToday() {
 
   } else {
 
+    /*
+      If viewing another year,
+      Today goes to January 1
+      of that selected year.
+    */
+
     currentDate =
       new Date(
         Number(selectedYear),
@@ -1193,6 +810,7 @@ function goToday() {
         1
       );
   }
+
 
   displayCurrentDate();
 }
@@ -1207,23 +825,28 @@ async function selectionChanged() {
   selectedLanguage =
     languageSelect.value;
 
+
   selectedYear =
     Number(
       yearSelect.value
     );
+
 
   localStorage.setItem(
     "watchwordLanguage",
     selectedLanguage
   );
 
+
   localStorage.setItem(
     "watchwordYear",
     String(selectedYear)
   );
 
+
   const today =
     new Date();
+
 
   if (
     today.getFullYear() ===
@@ -1242,6 +865,7 @@ async function selectionChanged() {
         1
       );
   }
+
 
   await loadSelectedFile();
 }
@@ -1262,24 +886,34 @@ function applyFontScale() {
       )
     );
 
+
+  /*
+    Base size = 18px.
+
+    Example:
+
+    100% = 18px
+    90%  = 16.2px
+    110% = 19.8px
+    150% = 27px
+  */
+
   const size =
     18 *
     readerScale /
     100;
+
 
   document.documentElement.style.setProperty(
     "--reader-size",
     size + "px"
   );
 
-  document.documentElement.style.setProperty(
-    "--reader-scale",
-    readerScale + "%"
-  );
 
   fontSizeLabel.textContent =
     readerScale +
     "%";
+
 
   localStorage.setItem(
     "watchwordFontScale",
@@ -1289,7 +923,7 @@ function applyFontScale() {
 
 
 // ============================================================
-// FONT BUTTONS
+// FONT DOWN
 // ============================================================
 
 fontDownBtn.addEventListener(
@@ -1303,6 +937,10 @@ fontDownBtn.addEventListener(
 );
 
 
+// ============================================================
+// FONT UP
+// ============================================================
+
 fontUpBtn.addEventListener(
   "click",
   function () {
@@ -1315,7 +953,7 @@ fontUpBtn.addEventListener(
 
 
 // ============================================================
-// NAVIGATION BUTTONS
+// PREVIOUS
 // ============================================================
 
 previousBtn.addEventListener(
@@ -1327,6 +965,10 @@ previousBtn.addEventListener(
 );
 
 
+// ============================================================
+// NEXT
+// ============================================================
+
 nextBtn.addEventListener(
   "click",
   function () {
@@ -1335,6 +977,10 @@ nextBtn.addEventListener(
   }
 );
 
+
+// ============================================================
+// TODAY
+// ============================================================
 
 todayBtn.addEventListener(
   "click",
@@ -1346,7 +992,7 @@ todayBtn.addEventListener(
 
 
 // ============================================================
-// SELECTORS
+// LANGUAGE
 // ============================================================
 
 languageSelect.addEventListener(
@@ -1354,6 +1000,10 @@ languageSelect.addEventListener(
   selectionChanged
 );
 
+
+// ============================================================
+// YEAR
+// ============================================================
 
 yearSelect.addEventListener(
   "change",
@@ -1374,12 +1024,14 @@ function updateNavigationButtons() {
       1
     );
 
+
   const lastDay =
     new Date(
       Number(selectedYear),
       11,
       31
     );
+
 
   previousBtn.disabled =
     dateKey(
@@ -1388,6 +1040,7 @@ function updateNavigationButtons() {
     dateKey(
       firstDay
     );
+
 
   nextBtn.disabled =
     dateKey(
@@ -1408,9 +1061,11 @@ async function saveOffline() {
   const file =
     getSelectedFile();
 
+
   if (!file) {
     return;
   }
+
 
   try {
 
@@ -1425,6 +1080,7 @@ async function saveOffline() {
         }
       );
 
+
     if (!response.ok) {
 
       throw new Error(
@@ -1432,8 +1088,10 @@ async function saveOffline() {
       );
     }
 
+
     const text =
       await response.text();
+
 
     localStorage.setItem(
       "watchwordOffline_" +
@@ -1441,19 +1099,24 @@ async function saveOffline() {
       text
     );
 
+
     offlineBtn.classList.add(
       "saved"
     );
 
+
     offlineBtn.textContent =
       "✓ Saved Offline";
+
 
   } catch (error) {
 
     console.error(error);
 
+
     offlineBtn.textContent =
       "Save Failed";
+
 
     setTimeout(
       function () {
@@ -1475,7 +1138,7 @@ offlineBtn.addEventListener(
 
 
 // ============================================================
-// START APPLICATION
+// START
 // ============================================================
 
 async function start() {
@@ -1484,8 +1147,15 @@ async function start() {
 
     applyFontScale();
 
+
     await loadFileList();
 
+
+    /*
+      Check whether the saved
+      language/year combination
+      still exists.
+    */
 
     const exists =
       files.some(
@@ -1500,21 +1170,35 @@ async function start() {
     if (!exists) {
 
       const first =
-        files[0];
+        files[
+          files.length - 1
+        ];
+
 
       selectedLanguage =
         first.language;
 
+
       selectedYear =
         first.year;
 
+
       languageSelect.value =
         selectedLanguage;
+
 
       yearSelect.value =
         String(selectedYear);
     }
 
+
+    /*
+      Use today's date if that
+      year exists.
+
+      Otherwise begin at January 1
+      of the selected year.
+    */
 
     const today =
       new Date();
@@ -1546,6 +1230,7 @@ async function start() {
 
     console.error(error);
 
+
     showError(
       "Could not start the Watchword application.\n\n" +
       error.message
@@ -1555,7 +1240,7 @@ async function start() {
 
 
 // ============================================================
-// RUN
+// START APPLICATION
 // ============================================================
 
 start();
