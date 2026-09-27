@@ -1,8 +1,3 @@
-/* =========================================================
-   MORAVIAN DAILY WATCHWORDS
-   TXT DISPLAY + CALENDAR + PWA
-========================================================= */
-
 * { box-sizing: border-box; }
 
 html, body {
@@ -25,6 +20,20 @@ body {
   color: #ffffff;
   text-align: center;
   padding: 22px 12px 20px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.header-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .site-header h1 {
@@ -127,7 +136,6 @@ button:disabled { opacity: 0.45; cursor: default; }
   border-color: #121826;
 }
 
-/* Calendar sits beside the font controls on larger screens. */
 .reading-tools {
   width: 100%;
   max-width: 900px;
@@ -166,9 +174,7 @@ button:disabled { opacity: 0.45; cursor: default; }
   box-shadow: 0 12px 30px rgba(20, 30, 50, 0.16);
 }
 
-.calendar-panel[hidden] {
-  display: none;
-}
+.calendar-panel[hidden] { display: none; }
 
 .calendar-panel-top {
   display: grid;
@@ -185,9 +191,7 @@ button:disabled { opacity: 0.45; cursor: default; }
   font-size: 21px;
 }
 
-.calendar-panel-top strong {
-  font-size: 15px;
-}
+.calendar-panel-top strong { font-size: 15px; }
 
 .calendar-weekdays,
 .calendar-days {
@@ -211,9 +215,7 @@ button:disabled { opacity: 0.45; cursor: default; }
   font-size: 12px;
 }
 
-.calendar-days .empty {
-  height: 34px;
-}
+.calendar-days .empty { height: 34px; }
 
 .calendar-days button.selected-day {
   background: #121826;
@@ -225,9 +227,7 @@ button:disabled { opacity: 0.45; cursor: default; }
   box-shadow: inset 0 0 0 2px #7d8798;
 }
 
-.calendar-panel-bottom {
-  margin-top: 9px;
-}
+.calendar-panel-bottom { margin-top: 9px; }
 
 .calendar-panel-bottom button {
   width: 100%;
@@ -269,26 +269,15 @@ button:disabled { opacity: 0.45; cursor: default; }
   text-align: center;
 }
 
-#offlineBtn,
 .install-button {
   width: auto;
   min-width: 145px;
   height: 36px;
   padding: 0 15px;
-  background: #f7f8fa;
-  font-size: 13px;
-}
-
-.install-button {
   background: #121826;
   color: #ffffff;
   border-color: #121826;
-}
-
-#offlineBtn.saved {
-  background: #eef8f0;
-  border-color: #8bc69a;
-  color: #176b2b;
+  font-size: 13px;
 }
 
 .status {
@@ -345,36 +334,57 @@ button:disabled { opacity: 0.45; cursor: default; }
   padding-bottom: 0;
 }
 
+.site-footer {
+  width: 100%;
+  padding: 24px 16px 30px;
+  color: #667085;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.footer-motto {
+  max-width: 900px;
+  margin: 0 auto 6px;
+  font-style: italic;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.footer-links a {
+  color: #344054;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 700px) {
-  .site-header {
-    padding: 9px 6px 8px;
+  .site-header { padding: 9px 6px 8px; }
+
+  .header-title { gap: 7px; }
+
+  .header-icon {
+    width: 30px;
+    height: 30px;
   }
 
-  .site-header h1 {
-    font-size: 20px;
-    line-height: 1.15;
-  }
+  .site-header h1 { font-size: 20px; line-height: 1.15; }
 
-  .container {
-    margin: 7px auto 0;
-    padding: 0 6px 25px;
-  }
+  .container { margin: 7px auto 0; padding: 0 6px 25px; }
 
-  .controls-card {
-    padding: 7px;
-    border-radius: 9px;
-    box-shadow: none;
-  }
+  .controls-card { padding: 7px; border-radius: 9px; box-shadow: none; }
 
-  .selectors {
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
-  }
+  .selectors { grid-template-columns: 1fr 1fr; gap: 5px; }
 
-  .selector-group label {
-    margin-bottom: 2px;
-    font-size: 10px;
-  }
+  .selector-group label { margin-bottom: 2px; font-size: 10px; }
 
   select {
     height: 31px;
@@ -385,11 +395,7 @@ button:disabled { opacity: 0.45; cursor: default; }
     text-align-last: center;
   }
 
-  .navigation {
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4px;
-    margin-top: 5px;
-  }
+  .navigation { grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 5px; }
 
   .navigation button {
     height: 31px;
@@ -419,31 +425,14 @@ button:disabled { opacity: 0.45; cursor: default; }
     border-radius: 9px;
   }
 
-  .calendar-days button {
-    height: 30px;
-    font-size: 11px;
-  }
+  .calendar-days button { height: 30px; font-size: 11px; }
+  .calendar-days .empty { height: 30px; }
+  .calendar-weekdays span { font-size: 9px; }
 
-  .calendar-days .empty {
-    height: 30px;
-  }
+  .calendar-panel-top { grid-template-columns: 32px 1fr 32px; }
+  .calendar-panel-top button { width: 32px; height: 28px; }
 
-  .calendar-weekdays span {
-    font-size: 9px;
-  }
-
-  .calendar-panel-top {
-    grid-template-columns: 32px 1fr 32px;
-  }
-
-  .calendar-panel-top button {
-    width: 32px;
-    height: 28px;
-  }
-
-  .font-controls {
-    gap: 5px;
-  }
+  .font-controls { gap: 5px; }
 
   .font-controls button {
     width: 30px;
@@ -452,16 +441,10 @@ button:disabled { opacity: 0.45; cursor: default; }
     font-size: 18px;
   }
 
-  #fontSizeLabel {
-    min-width: 43px;
-    font-size: 10px;
-  }
+  #fontSizeLabel { min-width: 43px; font-size: 10px; }
 
-  .offline-controls {
-    margin-top: 3px;
-  }
+  .offline-controls { margin-top: 3px; }
 
-  #offlineBtn,
   .install-button {
     min-width: 105px;
     height: 27px;
@@ -470,15 +453,9 @@ button:disabled { opacity: 0.45; cursor: default; }
     font-size: 10px;
   }
 
-  .status {
-    padding: 1px;
-    font-size: 9px;
-  }
+  .status { padding: 1px; font-size: 9px; }
 
-  .entry {
-    margin-top: 5px;
-    padding: 9px 3px 18px;
-  }
+  .entry { margin-top: 5px; padding: 9px 3px 18px; }
 
   .txt-line {
     padding: 0 4px 11px;
@@ -486,11 +463,19 @@ button:disabled { opacity: 0.45; cursor: default; }
     font-size: var(--reader-size, 16px);
     line-height: 1.45;
   }
+
+  .site-footer {
+    padding: 18px 8px 24px;
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 380px) {
-  .site-header h1 {
-    font-size: 18px;
+  .site-header h1 { font-size: 18px; }
+
+  .header-icon {
+    width: 26px;
+    height: 26px;
   }
 
   .txt-line {

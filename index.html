@@ -14,7 +14,11 @@
 </head>
 <body>
   <header class="site-header">
-    <h1>Moravian Daily Watchwords</h1>
+    <div class="header-title">
+      <img src="icons/icon-192.png" alt="" class="header-icon">
+      <h1>Moravian Daily Watchwords</h1>
+      <img src="icons/icon-192.png" alt="" class="header-icon">
+    </div>
   </header>
 
   <main class="container">
@@ -80,7 +84,6 @@
       </div>
 
       <div class="offline-controls">
-        <button id="offlineBtn" type="button">💾 Save Offline</button>
         <button id="installBtn" type="button" class="install-button" hidden>📲 Install App</button>
       </div>
 
@@ -89,6 +92,15 @@
 
     <section id="watchwordContent" class="watchword-content"></section>
   </main>
+
+  <footer class="site-footer">
+    <div class="footer-motto">“In essentials unity, in non-essentials liberty, in all things charity”</div>
+    <div class="footer-links">
+      <a href="https://moraviandw.blogspot.com/" target="_blank" rel="noopener noreferrer">WebApps</a>
+      <span>|</span>
+      <a href="https://dailywatchwords.wordpress.com/" target="_blank" rel="noopener noreferrer">Watchwords</a>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>
