@@ -1,11 +1,11 @@
 // ============================================================
 // MORAVIAN DAILY WATCHWORDS
-// GitHub Pages version
+// FINAL PARSER
 // ============================================================
 
 
 // ============================================================
-// GITHUB DATA
+// GITHUB
 // ============================================================
 
 const GITHUB_API =
@@ -16,7 +16,7 @@ const GITHUB_RAW_BASE =
 
 
 // ============================================================
-// DOM ELEMENTS
+// DOM
 // ============================================================
 
 const languageSelect =
@@ -54,7 +54,7 @@ const contentBox =
 
 
 // ============================================================
-// APPLICATION STATE
+// STATE
 // ============================================================
 
 let files = [];
@@ -75,26 +75,8 @@ let readerScale = Number(
 
 
 // ============================================================
-// BASIC HELPERS
+// HELPERS
 // ============================================================
-
-function setStatus(message) {
-
-  statusBox.textContent =
-    message || "";
-}
-
-
-function showError(message) {
-
-  contentBox.innerHTML = "";
-
-  statusBox.innerHTML =
-    '<div class="error">' +
-    escapeHtml(message) +
-    "</div>";
-}
-
 
 function escapeHtml(value) {
 
@@ -107,9 +89,27 @@ function escapeHtml(value) {
 }
 
 
-function pad(number) {
+function setStatus(text) {
 
-  return String(number)
+  statusBox.textContent =
+    text || "";
+}
+
+
+function showError(text) {
+
+  contentBox.innerHTML = "";
+
+  statusBox.innerHTML =
+    '<div class="error">' +
+    escapeHtml(text) +
+    "</div>";
+}
+
+
+function pad(n) {
+
+  return String(n)
     .padStart(2, "0");
 }
 
@@ -158,6 +158,15 @@ function formatDate(date) {
 }
 
 
+function normalizeText(text) {
+
+  return String(text)
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+
 // ============================================================
 // FILE INFORMATION
 // ============================================================
@@ -173,15 +182,6 @@ function fileInfo(filename) {
     return null;
   }
 
-
-  /*
-    Expected filenames:
-
-    2025 English.txt
-    2025 Rongmei.txt
-    2026 English.txt
-    2026 Rongmei.txt
-  */
 
   const match =
     filename.match(
@@ -203,7 +203,7 @@ function fileInfo(filename) {
 
 
 // ============================================================
-// LOAD AVAILABLE TXT FILES
+// LOAD TXT FILE LIST
 // ============================================================
 
 async function loadFileList() {
@@ -258,15 +258,13 @@ async function loadFileList() {
         (a, b) => {
 
           if (
-            a.year !==
-            b.year
+            a.year !== b.year
           ) {
             return (
               a.year -
               b.year
             );
           }
-
 
           return a.language.localeCompare(
             b.language,
@@ -283,7 +281,7 @@ async function loadFileList() {
   if (!files.length) {
 
     throw new Error(
-      "No Watchword TXT files were found in the data folder."
+      "No Watchword TXT files were found."
     );
   }
 
@@ -293,7 +291,7 @@ async function loadFileList() {
 
 
 // ============================================================
-// LANGUAGE / YEAR SELECTORS
+// SELECTORS
 // ============================================================
 
 function populateSelectors() {
@@ -322,10 +320,6 @@ function populateSelectors() {
         a - b
     );
 
-
-  // ----------------------------------------------------------
-  // Restore previous selection
-  // ----------------------------------------------------------
 
   const savedLanguage =
     localStorage.getItem(
@@ -357,10 +351,6 @@ function populateSelectors() {
       : years[years.length - 1];
 
 
-  // ----------------------------------------------------------
-  // Language
-  // ----------------------------------------------------------
-
   languageSelect.innerHTML =
     languages
       .map(
@@ -373,10 +363,6 @@ function populateSelectors() {
       )
       .join("");
 
-
-  // ----------------------------------------------------------
-  // Year
-  // ----------------------------------------------------------
 
   yearSelect.innerHTML =
     years
@@ -397,7 +383,7 @@ function populateSelectors() {
 
 
 // ============================================================
-// GET SELECTED FILE
+// SELECTED FILE
 // ============================================================
 
 function getSelectedFile() {
@@ -415,7 +401,7 @@ function getSelectedFile() {
 
 
 // ============================================================
-// LOAD SELECTED TXT FILE
+// LOAD SELECTED FILE
 // ============================================================
 
 async function loadSelectedFile() {
@@ -427,7 +413,7 @@ async function loadSelectedFile() {
   if (!file) {
 
     showError(
-      "The selected Watchword file could not be found."
+      "Selected Watchword file not found."
     );
 
     return;
@@ -492,23 +478,19 @@ async function loadSelectedFile() {
 
 
     records =
-      parseWatchwordFile(
-        text
-      );
+      parseFile(text);
 
 
     if (!records.length) {
 
       throw new Error(
-        "No Watchword records were found in " +
-        file.name +
-        "."
+        "No # records found in " +
+        file.name
       );
     }
 
 
     setStatus("");
-
 
     displayCurrentDate();
 
@@ -516,7 +498,6 @@ async function loadSelectedFile() {
   } catch (error) {
 
     console.error(error);
-
 
     showError(
       "Could not load " +
@@ -529,12 +510,12 @@ async function loadSelectedFile() {
 
 
 // ============================================================
-// SPLIT FILE USING #
+// # PARSER
 //
-// EVERY # STARTS A NEW DAY
+// Every # begins a new day.
 // ============================================================
 
-function splitRecords(text) {
+function parseFile(text) {
 
   const normalized =
     text
@@ -542,203 +523,60 @@ function splitRecords(text) {
       .replace(/\r/g, "\n");
 
 
-  /*
-    A # at the beginning of a line
-    starts a new daily entry.
-
-    Example:
-
-    #Friday, October 9
-
-    content...
-
-    #Saturday, October 10
-
-    content...
-  */
-
-  const parts =
+  const blocks =
     normalized.split(
       /^\s*#/m
     );
 
 
-  /*
-    Anything before the first #
-    is ignored.
-  */
-
-  return parts
+  return blocks
     .slice(1)
     .map(
-      part =>
-        part.trim()
+      (block, index) => {
+
+        const lines =
+          block
+            .split("\n")
+            .map(
+              line =>
+                line.trim()
+            )
+            .filter(
+              line =>
+                line !== ""
+            );
+
+
+        return {
+          dayNumber:
+            index + 1,
+          lines
+        };
+      }
     )
-    .filter(Boolean);
+    .filter(
+      record =>
+        record.lines.length
+    );
 }
 
 
 // ============================================================
-// PARSE WATCHWORD FILE
-// ============================================================
-
-function parseWatchwordFile(text) {
-
-  const blocks =
-    splitRecords(text);
-
-
-  return blocks.map(
-    (block, index) => {
-
-      const lines =
-        block
-          .split("\n")
-          .map(
-            line =>
-              line.trim()
-          )
-          .filter(
-            line =>
-              line !== ""
-          );
-
-
-      return {
-
-        index,
-
-        /*
-          First # block = January 1
-          Second # block = January 2
-          etc.
-
-          This is used only for navigation/date matching.
-        */
-
-        dayNumber:
-          index + 1,
-
-        lines
-      };
-    }
-  );
-}
-
-
-// ============================================================
-// GET RECORD FOR DATE
+// RECORD FOR DATE
 // ============================================================
 
 function getRecordForDate(date) {
 
-  const number =
-    dayOfYear(date);
-
-
   return (
-    records[number - 1] ||
-    null
+    records[
+      dayOfYear(date) - 1
+    ] || null
   );
 }
 
 
 // ============================================================
-// NORMALIZE TEXT FOR COMPARISON
-// ============================================================
-
-function normalizeForComparison(text) {
-
-  return String(text)
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-}
-
-
-// ============================================================
-// REMOVE DUPLICATE CONSECUTIVE LINES
-// ============================================================
-
-function removeDuplicateLines(lines) {
-
-  const result = [];
-
-
-  for (
-    const line of lines
-  ) {
-
-    const current =
-      line.trim();
-
-
-    if (!current) {
-      continue;
-    }
-
-
-    if (
-      result.length &&
-      normalizeForComparison(
-        result[
-          result.length - 1
-        ]
-      ) ===
-      normalizeForComparison(
-        current
-      )
-    ) {
-
-      continue;
-    }
-
-
-    result.push(current);
-  }
-
-
-  return result;
-}
-
-
-// ============================================================
-// REMOVE REPEATED HEADING
-// ============================================================
-
-function removeRepeatedHeading(
-  heading,
-  lines
-) {
-
-  if (!heading) {
-    return lines;
-  }
-
-
-  const headingClean =
-    normalizeForComparison(
-      heading
-    );
-
-
-  /*
-    Remove another exact copy
-    of the # heading anywhere
-    in the same daily record.
-  */
-
-  return lines.filter(
-    line =>
-      normalizeForComparison(
-        line
-      ) !== headingClean
-  );
-}
-
-
-// ============================================================
-// DATE LINE DETECTION
+// DATE LINE
 // ============================================================
 
 function looksLikeDateLine(line) {
@@ -748,205 +586,162 @@ function looksLikeDateLine(line) {
 
 
   /*
-    Our files contain English month
-    names even when the rest of the
-    text is in another language.
+    Recognize English month names.
 
-    Examples:
+    This supports examples such as:
 
     Friday, October 9
 
-    Sunday, September 27
+    Thursday, September 24
 
     Sunday/Neihneic, October – Baanchthbw 4
   */
 
-
-  const hasMonth =
-    /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b/i
-      .test(text);
+  const month =
+    /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\b/i;
 
 
-  if (!hasMonth) {
+  if (!month.test(text)) {
     return false;
   }
 
 
   /*
-    A date line should also contain
-    a day number.
-
-    Examples:
-
-    October 9
-    October – 4
-    September 27
+    There must also be a number.
   */
 
-  const hasNumber =
-    /\b\d{1,2}\b/
-      .test(text);
+  return /\d{1,2}/.test(text);
+}
 
 
-  if (!hasNumber) {
+// ============================================================
+// SCRIPTURE READINGS
+// ============================================================
+
+function looksLikeReadings(line) {
+
+  if (!line.includes(";")) {
     return false;
   }
 
 
-  return true;
-}
-
-
-// ============================================================
-// FIND DATE LINE
-// ============================================================
-
-function findDateLine(lines) {
-
-  /*
-    Usually the date is one of the
-    first few lines.
-
-    Search the first 4 lines only,
-    so that ordinary Bible text
-    containing a month isn't mistaken
-    for the date.
-  */
-
-  const limit =
-    Math.min(
-      lines.length,
-      4
+  const refs =
+    line.match(
+      /\b\d+:\d+(?:[-–]\d+)?/g
     );
-
-
-  for (
-    let i = 0;
-    i < limit;
-    i++
-  ) {
-
-    if (
-      looksLikeDateLine(
-        lines[i]
-      )
-    ) {
-
-      return i;
-    }
-  }
-
-
-  return -1;
-}
-
-
-// ============================================================
-// BIBLE REFERENCE DETECTION
-// ============================================================
-
-function hasBibleReference(text) {
-
-  /*
-    Detects references such as:
-
-    13:8
-    25:1-13
-    18:1-4,25-32
-    10:31
-
-    The reference must be at the end
-    of the line.
-  */
-
-  return /\b\d+:\d+(?:[-–]\d+)?(?:,\s*\d+(?:[-–]\d+)?)*\s*$/u
-    .test(
-      text.trim()
-    );
-}
-
-
-// ============================================================
-// FORMAT BIBLE VERSE
-//
-// Bible text = BOLD
-// Bible reference = ITALIC
-// ============================================================
-
-function formatBibleVerse(text) {
-
-  const clean =
-    text.trim();
-
-
-  /*
-    Try to separate the final
-    Bible book + chapter/verse.
-
-    Examples:
-
-    Isaiah 50:9
-    John 17:26
-    Nehemia 9:5
-    1 Korinmei 10:31
-  */
-
-  const match =
-    clean.match(
-      /^(.*?)(?:\s+)((?:[1-3]\s+)?[A-Za-zÀ-ž][A-Za-zÀ-ž0-9'’.\-]*(?:\s+[A-Za-zÀ-ž][A-Za-zÀ-ž0-9'’.\-]*){0,5}\s+\d+:\d+(?:[-–]\d+)?(?:,\s*\d+(?:[-–]\d+)?)?)$/u
-    );
-
-
-  if (!match) {
-
-    return (
-      '<div class="reader-paragraph verse-text">' +
-      "<strong>" +
-      escapeHtml(
-        clean
-      ) +
-      "</strong>" +
-      "</div>"
-    );
-  }
-
-
-  const verseText =
-    match[1].trim();
-
-
-  const reference =
-    match[2].trim();
 
 
   return (
-    '<div class="reader-paragraph verse-text">' +
-
-    "<strong>" +
-    escapeHtml(
-      verseText
-    ) +
-    "</strong> " +
-
-    '<span class="reference">' +
-    escapeHtml(
-      reference
-    ) +
-    "</span>" +
-
-    "</div>"
+    refs &&
+    refs.length >= 2
   );
 }
 
 
 // ============================================================
-// WATCHWORD DETECTION
+// SPECIAL TITLE
 // ============================================================
 
-function formatWatchword(text) {
+function isSpecialTitle(line) {
+
+  return (
+    /^\*[^*]+\*:/u.test(line) ||
+    /^Good Friday\b/i.test(line) ||
+    /^Maundy Thursday\b/i.test(line)
+  );
+}
+
+
+// ============================================================
+// BIBLE REFERENCE
+//
+// IMPORTANT:
+//
+// We only look for the FINAL reference.
+// We do NOT allow arbitrary sentence words
+// to become part of the reference.
+//
+// Examples:
+//
+// Isaiah 50:9
+// Ezekiel 36:36
+// Romans 8:34
+// 1 Samuel 30:1
+// 1 Korinmei 10:31
+// ============================================================
+
+function splitBibleReference(line) {
+
+  const text =
+    line.trim();
+
+
+  /*
+    The final part must look like:
+
+    Book 12:34
+    Book 12:34-36
+    1 Book 12:34
+
+    Book names can have up to 4 words,
+    but ONLY words beginning with an
+    uppercase letter are accepted.
+
+    This prevents:
+
+    "rebuilt the ruined places and
+     replanted that which was desolate.
+     Ezekiel 36:36"
+
+    from swallowing the sentence.
+  */
+
+  const pattern =
+    /((?:[1-3]\s+)?[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’.\-]*(?:\s+[A-ZÀ-ÖØ-Þ][A-Za-zÀ-ÖØ-öø-ÿ'’.\-]*){0,3}\s+\d+:\d+(?:[-–]\d+)?(?:,\s*\d+(?:[-–]\d+)?)?)$/u;
+
 
   const match =
-    text.match(
+    text.match(pattern);
+
+
+  if (!match) {
+    return null;
+  }
+
+
+  const reference =
+    match[1].trim();
+
+
+  const verseText =
+    text
+      .slice(
+        0,
+        match.index
+      )
+      .trim();
+
+
+  if (!verseText) {
+    return null;
+  }
+
+
+  return {
+    verseText,
+    reference
+  };
+}
+
+
+// ============================================================
+// WATCHWORD
+// ============================================================
+
+function parseWatchword(line) {
+
+  const match =
+    line.match(
       /^Watchword\s+for\s+the\s+Week\s*:\s*(.*)$/i
     );
 
@@ -956,120 +751,53 @@ function formatWatchword(text) {
   }
 
 
-  const verse =
-    match[1].trim();
+  const value =
+    splitBibleReference(
+      match[1]
+    );
 
 
-  return (
-    '<div class="watchword-line">' +
+  if (!value) {
 
-    "<strong>" +
-    "Watchword for the Week:" +
-    "</strong> " +
+    return {
+      text:
+        match[1].trim(),
+      reference:
+        ""
+    };
+  }
 
-    formatWatchwordVerse(
-      verse
-    ) +
 
-    "</div>"
-  );
+  return value;
 }
 
 
 // ============================================================
-// FORMAT WATCHWORD VERSE
+// REMOVE DUPLICATE HEADING
 // ============================================================
 
-function formatWatchwordVerse(
-  text
+function removeHeadingDuplicate(
+  heading,
+  lines
 ) {
 
-  const match =
-    text.match(
-      /^(.*?)(?:\s+)((?:[1-3]\s+)?[A-Za-zÀ-ž][A-Za-zÀ-ž0-9'’.\-]*(?:\s+[A-Za-zÀ-ž][A-Za-zÀ-ž0-9'’.\-]*){0,5}\s+\d+:\d+(?:[-–]\d+)?)$/u
-    );
-
-
-  if (!match) {
-
-    return (
-      "<strong>" +
-      escapeHtml(
-        text
-      ) +
-      "</strong>"
-    );
+  if (!heading) {
+    return lines;
   }
 
 
-  return (
-    "<strong>" +
-    escapeHtml(
-      match[1].trim()
-    ) +
-    "</strong> " +
-
-    '<span class="reference">' +
-    escapeHtml(
-      match[2].trim()
-    ) +
-    "</span>"
-  );
-}
-
-
-// ============================================================
-// SCRIPTURE READINGS DETECTION
-// ============================================================
-
-function looksLikeReadings(line) {
-
-  /*
-    Scripture reading lines normally
-    contain several references separated
-    by semicolons.
-
-    Example:
-
-    Psalm 118:1–9; 1 Samuel 30:1; John 6:25–42
-  */
-
-  if (
-    !line.includes(";")
-  ) {
-    return false;
-  }
-
-
-  const references =
-    line.match(
-      /\b\d+:\d+(?:[-–]\d+)?/g
+  const normalizedHeading =
+    normalizeText(
+      heading
     );
 
 
-  return (
-    references &&
-    references.length >= 2
-  );
-}
-
-
-// ============================================================
-// SPECIAL TITLES
-// ============================================================
-
-function isSpecialTitle(line) {
-
-  return (
-    /^\*[^*]+\*:/u.test(line) ||
-
-    /^Good Friday\b/i.test(
-      line
-    ) ||
-
-    /^Maundy Thursday\b/i.test(
-      line
-    )
+  return lines.filter(
+    line =>
+      normalizeText(
+        line
+      ) !==
+      normalizedHeading
   );
 }
 
@@ -1098,62 +826,60 @@ function displayRecord(
   }
 
 
-  // ----------------------------------------------------------
-  // Clean lines
-  // ----------------------------------------------------------
-
   let lines =
-    removeDuplicateLines(
-      record.lines
-    );
+    record.lines.slice();
 
 
   /*
-    ----------------------------------------------------------
-    IMPORTANT STRUCTURE
-    ----------------------------------------------------------
-
-    A record can look like:
-
-    #Friday, October 9
-
-    Psalm 118:1–9; 1 Samuel 30:1; John 6:25–42
-
-    It is the Lord GOD who helps me...
-    Isaiah 50:9
-
-    OR:
-
-    #Pentecost tangv Ruhna-Chaku Sunday/Neihneic
-
-    Pentecost tangv Ruhna-Chaku Sunday/Neihneic
-
-    *Neihdak khang Tingmikthui Raswai*: ...
-
-    Sunday/Neihneic, October – Baanchthbw 4
-
-    ...
-
-    Therefore:
-
-    First line may be:
-      1. heading
-      2. date
+    Remove empty lines and
+    consecutive duplicates.
   */
 
+  const cleaned = [];
+
+  for (
+    const line of lines
+  ) {
+
+    if (!line.trim()) {
+      continue;
+    }
+
+
+    if (
+      cleaned.length &&
+      normalizeText(
+        cleaned[
+          cleaned.length - 1
+        ]
+      ) ===
+      normalizeText(
+        line
+      )
+    ) {
+      continue;
+    }
+
+
+    cleaned.push(
+      line.trim()
+    );
+  }
+
+
+  lines = cleaned;
+
+
+  // ----------------------------------------------------------
+  // Determine heading/date
+  // ----------------------------------------------------------
 
   let heading = "";
 
   let dateLine = "";
 
 
-  // ----------------------------------------------------------
-  // First line
-  // ----------------------------------------------------------
-
-  if (
-    lines.length
-  ) {
+  if (lines.length) {
 
     if (
       looksLikeDateLine(
@@ -1162,7 +888,9 @@ function displayRecord(
     ) {
 
       /*
-        The # line itself was the date.
+        Example:
+
+        #Friday, October 9
       */
 
       dateLine =
@@ -1171,7 +899,9 @@ function displayRecord(
     } else {
 
       /*
-        The # line itself was a heading.
+        Example:
+
+        #Pentecost tangv Ruhna-Chaku Sunday/Neihneic
       */
 
       heading =
@@ -1180,105 +910,106 @@ function displayRecord(
   }
 
 
-  // ----------------------------------------------------------
-  // Remove duplicate heading
-  // ----------------------------------------------------------
+  /*
+    If there is a heading, remove
+    another exact copy of it.
+  */
 
   if (heading) {
 
     lines =
-      removeRepeatedHeading(
+      removeHeadingDuplicate(
         heading,
         lines
       );
   }
 
 
-  // ----------------------------------------------------------
-  // Find date after heading
-  // ----------------------------------------------------------
+  /*
+    Find the actual date line
+    after the heading.
+  */
 
   if (!dateLine) {
 
-    const dateIndex =
-      findDateLine(
-        lines
+    for (
+      let i = 0;
+      i < Math.min(
+        lines.length,
+        4
       );
-
-
-    if (
-      dateIndex !== -1
+      i++
     ) {
 
-      dateLine =
-        lines.splice(
-          dateIndex,
-          1
-        )[0];
+      if (
+        looksLikeDateLine(
+          lines[i]
+        )
+      ) {
+
+        dateLine =
+          lines.splice(
+            i,
+            1
+          )[0];
+
+        break;
+      }
     }
   }
 
 
   // ----------------------------------------------------------
-  // START HTML
+  // BUILD HTML
   // ----------------------------------------------------------
 
   let html = "";
 
 
-  // ----------------------------------------------------------
-  // HEADING
-  // ----------------------------------------------------------
+  /*
+    Heading = normal
+  */
 
   if (heading) {
 
     html +=
       '<div class="entry-heading">' +
-
       escapeHtml(
         heading
-          .replace(
-            /^\*|\*$/g,
-            ""
-          )
       ) +
-
       "</div>";
   }
 
 
-  // ----------------------------------------------------------
-  // DATE
-  // ----------------------------------------------------------
+  /*
+    Date = BOLD
+  */
 
   if (dateLine) {
 
     html +=
       '<div class="date">' +
-
       escapeHtml(
         dateLine
       ) +
-
       "</div>";
   }
 
 
   // ----------------------------------------------------------
-  // PROCESS REMAINING CONTENT
+  // Remaining lines
   // ----------------------------------------------------------
 
   for (
     const line of lines
   ) {
 
-
     // --------------------------------------------------------
-    // WATCHWORD FOR THE WEEK
+    // Watchword for the Week
     // --------------------------------------------------------
 
     const watchword =
-      formatWatchword(
+      parseWatchword(
         line
       );
 
@@ -1286,20 +1017,48 @@ function displayRecord(
     if (watchword) {
 
       html +=
-        watchword;
+        '<div class="watchword-line">';
+
+
+      html +=
+        "<strong>" +
+        "Watchword for the Week:" +
+        "</strong> ";
+
+
+      html +=
+        "<strong>" +
+        escapeHtml(
+          watchword.text
+        ) +
+        "</strong>";
+
+
+      if (
+        watchword.reference
+      ) {
+
+        html +=
+          " " +
+          '<span class="reference">' +
+          escapeHtml(
+            watchword.reference
+          ) +
+          "</span>";
+      }
+
+
+      html +=
+        "</div>";
+
 
       continue;
     }
 
 
     // --------------------------------------------------------
-    // ANOTHER DATE LINE
+    // Ignore another date line
     // --------------------------------------------------------
-
-    /*
-      If a date line somehow remains,
-      don't display it a second time.
-    */
 
     if (
       looksLikeDateLine(
@@ -1312,7 +1071,7 @@ function displayRecord(
 
 
     // --------------------------------------------------------
-    // SCRIPTURE READINGS
+    // Scripture readings
     // --------------------------------------------------------
 
     if (
@@ -1323,11 +1082,9 @@ function displayRecord(
 
       html +=
         '<div class="readings">' +
-
         escapeHtml(
           line
         ) +
-
         "</div>";
 
       continue;
@@ -1335,7 +1092,7 @@ function displayRecord(
 
 
     // --------------------------------------------------------
-    // SPECIAL TITLE
+    // Special title
     // --------------------------------------------------------
 
     if (
@@ -1344,12 +1101,7 @@ function displayRecord(
       )
     ) {
 
-      /*
-        Remove * used in the TXT
-        as markup.
-      */
-
-      const cleaned =
+      const special =
         line.replace(
           /^\*|\*$/g,
           ""
@@ -1358,10 +1110,41 @@ function displayRecord(
 
       html +=
         '<div class="special">' +
-
         escapeHtml(
-          cleaned
+          special
         ) +
+        "</div>";
+
+      continue;
+    }
+
+
+    // --------------------------------------------------------
+    // Bible verse
+    // --------------------------------------------------------
+
+    const bible =
+      splitBibleReference(
+        line
+      );
+
+
+    if (bible) {
+
+      html +=
+        '<div class="reader-paragraph">' +
+
+        "<strong>" +
+        escapeHtml(
+          bible.verseText
+        ) +
+        "</strong> " +
+
+        '<span class="reference">' +
+        escapeHtml(
+          bible.reference
+        ) +
+        "</span>" +
 
         "</div>";
 
@@ -1370,41 +1153,20 @@ function displayRecord(
 
 
     // --------------------------------------------------------
-    // BIBLE VERSE
-    // --------------------------------------------------------
-
-    if (
-      hasBibleReference(
-        line
-      )
-    ) {
-
-      html +=
-        formatBibleVerse(
-          line
-        );
-
-      continue;
-    }
-
-
-    // --------------------------------------------------------
-    // NORMAL TEXT
+    // Normal text
     // --------------------------------------------------------
 
     html +=
       '<div class="reader-paragraph">' +
-
       escapeHtml(
         line
       ) +
-
       "</div>";
   }
 
 
   // ----------------------------------------------------------
-  // FINAL ENTRY
+  // FINAL
   // ----------------------------------------------------------
 
   contentBox.innerHTML =
@@ -1440,9 +1202,7 @@ function displayCurrentDate() {
 // PREVIOUS / NEXT
 // ============================================================
 
-function moveDate(
-  days
-) {
+function moveDate(days) {
 
   const newDate =
     new Date(
@@ -1456,15 +1216,10 @@ function moveDate(
   );
 
 
-  /*
-    Stay inside selected year.
-  */
-
   if (
     newDate.getFullYear() !==
     Number(selectedYear)
   ) {
-
     return;
   }
 
@@ -1581,13 +1336,35 @@ function applyFontScale() {
     );
 
 
-  document.documentElement
-    .style
-    .setProperty(
-      "--reader-size",
-      (18 * readerScale / 100) +
-      "px"
-    );
+  /*
+    Set BOTH:
+
+    --reader-size
+
+    and
+
+    --reader-scale
+
+    so the CSS always receives
+    the current value.
+  */
+
+  const size =
+    18 *
+    readerScale /
+    100;
+
+
+  document.documentElement.style.setProperty(
+    "--reader-size",
+    size + "px"
+  );
+
+
+  document.documentElement.style.setProperty(
+    "--reader-scale",
+    readerScale + "%"
+  );
 
 
   fontSizeLabel.textContent =
@@ -1608,7 +1385,7 @@ function applyFontScale() {
 
 fontDownBtn.addEventListener(
   "click",
-  () => {
+  function () {
 
     readerScale -= 5;
 
@@ -1619,7 +1396,7 @@ fontDownBtn.addEventListener(
 
 fontUpBtn.addEventListener(
   "click",
-  () => {
+  function () {
 
     readerScale += 5;
 
@@ -1629,12 +1406,12 @@ fontUpBtn.addEventListener(
 
 
 // ============================================================
-// NAVIGATION BUTTONS
+// NAVIGATION
 // ============================================================
 
 previousBtn.addEventListener(
   "click",
-  () => {
+  function () {
 
     moveDate(-1);
   }
@@ -1643,7 +1420,7 @@ previousBtn.addEventListener(
 
 nextBtn.addEventListener(
   "click",
-  () => {
+  function () {
 
     moveDate(1);
   }
@@ -1652,7 +1429,7 @@ nextBtn.addEventListener(
 
 todayBtn.addEventListener(
   "click",
-  () => {
+  function () {
 
     goToday();
   }
@@ -1698,13 +1475,21 @@ function updateNavigationButtons() {
 
 
   previousBtn.disabled =
-    dateKey(currentDate) ===
-    dateKey(firstDay);
+    dateKey(
+      currentDate
+    ) ===
+    dateKey(
+      firstDay
+    );
 
 
   nextBtn.disabled =
-    dateKey(currentDate) ===
-    dateKey(lastDay);
+    dateKey(
+      currentDate
+    ) ===
+    dateKey(
+      lastDay
+    );
 }
 
 
@@ -1775,7 +1560,7 @@ async function saveOffline() {
 
 
     setTimeout(
-      () => {
+      function () {
 
         offlineBtn.textContent =
           "💾 Save Offline";
@@ -1794,7 +1579,7 @@ offlineBtn.addEventListener(
 
 
 // ============================================================
-// START APPLICATION
+// START
 // ============================================================
 
 async function start() {
@@ -1808,12 +1593,11 @@ async function start() {
 
 
     /*
-      Check whether the saved
-      language/year combination
-      still exists.
+      Make sure selected
+      language/year exists.
     */
 
-    const savedCombinationExists =
+    const exists =
       files.some(
         file =>
           file.language ===
@@ -1823,9 +1607,7 @@ async function start() {
       );
 
 
-    if (
-      !savedCombinationExists
-    ) {
+    if (!exists) {
 
       const first =
         files[0];
@@ -1868,7 +1650,7 @@ async function start() {
 
       currentDate =
         new Date(
-          Number(selectedYear),
+          selectedYear,
           0,
           1
         );
