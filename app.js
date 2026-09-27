@@ -2,24 +2,21 @@
 // MORAVIAN DAILY WATCHWORDS
 // SIMPLE TXT DISPLAY VERSION
 //
-// The TXT file is treated as the source of truth.
-// # = beginning of a new daily entry.
+// files.json = list of TXT files
+// #          = beginning of a new daily entry
 //
-// No Bible-reference parsing.
-// No sentence parsing.
-// No automatic duplicate removal.
+// The TXT content itself is NOT interpreted.
 // ============================================================
 
 
 // ============================================================
-// GITHUB DATA
+// DATA LOCATION
 // ============================================================
 
-const GITHUB_API =
-  "https://api.github.com/repos/ebenezergangmei/moravianDW/contents/data?ref=main";
+const DATA_FOLDER = "data/";
 
-const GITHUB_RAW_BASE =
-  "https://raw.githubusercontent.com/ebenezergangmei/moravianDW/main/data/";
+const FILE_LIST =
+  DATA_FOLDER + "files.json";
 
 
 // ============================================================
@@ -74,11 +71,12 @@ let selectedYear = "";
 
 let currentDate = new Date();
 
-let readerScale = Number(
-  localStorage.getItem(
-    "watchwordFontScale"
-  ) || 100
-);
+let readerScale =
+  Number(
+    localStorage.getItem(
+      "watchwordFontScale"
+    ) || 100
+  );
 
 
 // ============================================================
@@ -165,24 +163,17 @@ function formatDate(date) {
 }
 
 
-function normalizeText(text) {
-
-  return String(text)
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-}
-
-
 // ============================================================
 // FILE INFORMATION
 //
-// Expected filenames:
+// Example:
 //
-// 2025 English.txt
-// 2025 Rongmei.txt
 // 2026 English.txt
-// 2026 Rongmei.txt
+//
+// becomes:
+//
+// year     = 2026
+// language = English
 // ============================================================
 
 function fileInfo(filename) {
@@ -219,10 +210,9 @@ function fileInfo(filename) {
 // ============================================================
 // LOAD FILE LIST
 //
-// GitHub automatically tells us what TXT files are
-// inside /data.
+// We use files.json instead of the GitHub API.
 //
-// Therefore files.json is NOT required.
+// This avoids GitHub API 403/rate-limit problems.
 // ============================================================
 
 async function loadFileList() {
@@ -234,13 +224,11 @@ async function loadFileList() {
 
   const response =
     await fetch(
-      GITHUB_API,
+      FILE_LIST +
+      "?v=" +
+      Date.now(),
       {
-        cache: "no-store",
-        headers: {
-          Accept:
-            "application/vnd.github+json"
-        }
+        cache: "no-store"
       }
     );
 
@@ -248,29 +236,32 @@ async function loadFileList() {
   if (!response.ok) {
 
     throw new Error(
-      "Could not read the GitHub data folder (" +
+      "Could not read data/files.json (" +
       response.status +
       ")."
     );
   }
 
 
-  const items =
+  const list =
     await response.json();
 
 
+  if (
+    !Array.isArray(list)
+  ) {
+
+    throw new Error(
+      "data/files.json must contain a JSON array."
+    );
+  }
+
+
   files =
-    items
-      .filter(
-        item =>
-          item.type === "file" &&
-          item.name
-            .toLowerCase()
-            .endsWith(".txt")
-      )
+    list
       .map(
-        item =>
-          fileInfo(item.name)
+        filename =>
+          fileInfo(filename)
       )
       .filter(Boolean)
       .sort(
@@ -287,12 +278,7 @@ async function loadFileList() {
 
 
           return a.language.localeCompare(
-            b.language,
-            undefined,
-            {
-              sensitivity:
-                "base"
-            }
+            b.language
           );
         }
       );
@@ -301,7 +287,7 @@ async function loadFileList() {
   if (!files.length) {
 
     throw new Error(
-      "No Watchword TXT files were found in the data folder."
+      "No TXT files were found in files.json."
     );
   }
 
@@ -311,7 +297,7 @@ async function loadFileList() {
 
 
 // ============================================================
-// LANGUAGE + YEAR SELECTORS
+// POPULATE LANGUAGE + YEAR
 // ============================================================
 
 function populateSelectors() {
@@ -368,7 +354,9 @@ function populateSelectors() {
       savedYear
     )
       ? savedYear
-      : years[years.length - 1];
+      : years[
+          years.length - 1
+        ];
 
 
   languageSelect.innerHTML =
@@ -403,7 +391,7 @@ function populateSelectors() {
 
 
 // ============================================================
-// GET CURRENT FILE
+// SELECTED FILE
 // ============================================================
 
 function getSelectedFile() {
@@ -421,7 +409,7 @@ function getSelectedFile() {
 
 
 // ============================================================
-// LOAD SELECTED TXT
+// LOAD TXT FILE
 // ============================================================
 
 async function loadSelectedFile() {
@@ -433,7 +421,7 @@ async function loadSelectedFile() {
   if (!file) {
 
     showError(
-      "The selected Watchword file could not be found."
+      "The selected Watchword file was not found."
     );
 
     return;
@@ -471,10 +459,12 @@ async function loadSelectedFile() {
 
     const response =
       await fetch(
-        GITHUB_RAW_BASE +
+        DATA_FOLDER +
         encodeURIComponent(
           file.name
-        ),
+        ) +
+        "?v=" +
+        Date.now(),
         {
           cache: "no-store"
         }
@@ -498,18 +488,11 @@ async function loadSelectedFile() {
 
 
     /*
-      IMPORTANT:
-
-      The TXT file itself is the source
-      of truth.
-
-      We only split it at #.
+      ONLY # is interpreted.
     */
 
     records =
-      parseFile(
-        text
-      );
+      parseFile(text);
 
 
     if (!records.length) {
@@ -523,14 +506,12 @@ async function loadSelectedFile() {
 
     setStatus("");
 
-
     displayCurrentDate();
 
 
   } catch (error) {
 
     console.error(error);
-
 
     showError(
       "Could not load " +
@@ -545,9 +526,9 @@ async function loadSelectedFile() {
 // ============================================================
 // PARSE TXT
 //
-// ONLY # HAS SPECIAL MEANING.
+// Every # begins a new day.
 //
-// Everything inside each # section is kept.
+// Nothing else is interpreted.
 // ============================================================
 
 function parseFile(text) {
@@ -557,10 +538,6 @@ function parseFile(text) {
       .replace(/\r\n/g, "\n")
       .replace(/\r/g, "\n");
 
-
-  /*
-    Every # begins a new daily entry.
-  */
 
   const blocks =
     normalized.split(
@@ -573,25 +550,19 @@ function parseFile(text) {
     .map(
       block => {
 
-        /*
-          Keep the original lines.
-
-          We remove only completely empty
-          lines at the beginning/end.
-        */
-
         const lines =
           block
-            .split("\n")
-            .map(
-              line =>
-                line.trim()
-            );
+            .split("\n");
 
+
+        /*
+          Remove only empty lines
+          at the beginning and end.
+        */
 
         while (
           lines.length &&
-          lines[0] === ""
+          lines[0].trim() === ""
         ) {
           lines.shift();
         }
@@ -601,7 +572,7 @@ function parseFile(text) {
           lines.length &&
           lines[
             lines.length - 1
-          ] === ""
+          ].trim() === ""
         ) {
           lines.pop();
         }
@@ -620,11 +591,7 @@ function parseFile(text) {
 
 
 // ============================================================
-// GET DAILY RECORD
-//
-// Record #1 = January 1
-// Record #2 = January 2
-// etc.
+// GET RECORD FOR DATE
 // ============================================================
 
 function getRecordForDate(date) {
@@ -641,17 +608,19 @@ function getRecordForDate(date) {
 
 
 // ============================================================
-// DISPLAY DAILY RECORD
+// DISPLAY RECORD
 //
 // IMPORTANT:
 //
-// NO Bible parsing.
-// NO heading parsing.
-// NO duplicate removal.
-// NO "undefined".
-// NO automatic interpretation.
+// The TXT file is the source of truth.
 //
-// The TXT lines are simply displayed.
+// No:
+// - Bible parsing
+// - heading parsing
+// - reference parsing
+// - duplicate removal
+// - automatic bolding
+// - automatic italicizing
 // ============================================================
 
 function displayRecord(
@@ -674,30 +643,16 @@ function displayRecord(
   }
 
 
-  /*
-    Build one paragraph for every
-    non-empty TXT line.
-
-    The content itself is untouched.
-  */
-
   let html = "";
 
 
   for (
-    let i = 0;
-    i < record.lines.length;
-    i++
+    const line of record.lines
   ) {
 
-    const line =
-      record.lines[i];
-
-
     /*
-      Ignore only empty lines.
-
-      We do NOT alter the text.
+      Ignore completely empty
+      lines between paragraphs.
     */
 
     if (
@@ -709,7 +664,9 @@ function displayRecord(
 
     html +=
       '<div class="txt-line">' +
-      escapeHtml(line) +
+      escapeHtml(
+        line.trim()
+      ) +
       "</div>";
   }
 
@@ -722,7 +679,7 @@ function displayRecord(
 
 
 // ============================================================
-// DISPLAY CURRENT DATE
+// DISPLAY CURRENT DAY
 // ============================================================
 
 function displayCurrentDate() {
@@ -796,12 +753,6 @@ function goToday() {
       today;
 
   } else {
-
-    /*
-      If viewing another year,
-      Today goes to January 1
-      of that selected year.
-    */
 
     currentDate =
       new Date(
@@ -887,17 +838,6 @@ function applyFontScale() {
     );
 
 
-  /*
-    Base size = 18px.
-
-    Example:
-
-    100% = 18px
-    90%  = 16.2px
-    110% = 19.8px
-    150% = 27px
-  */
-
   const size =
     18 *
     readerScale /
@@ -923,7 +863,7 @@ function applyFontScale() {
 
 
 // ============================================================
-// FONT DOWN
+// FONT BUTTONS
 // ============================================================
 
 fontDownBtn.addEventListener(
@@ -937,10 +877,6 @@ fontDownBtn.addEventListener(
 );
 
 
-// ============================================================
-// FONT UP
-// ============================================================
-
 fontUpBtn.addEventListener(
   "click",
   function () {
@@ -953,7 +889,7 @@ fontUpBtn.addEventListener(
 
 
 // ============================================================
-// PREVIOUS
+// NAVIGATION BUTTONS
 // ============================================================
 
 previousBtn.addEventListener(
@@ -965,10 +901,6 @@ previousBtn.addEventListener(
 );
 
 
-// ============================================================
-// NEXT
-// ============================================================
-
 nextBtn.addEventListener(
   "click",
   function () {
@@ -977,10 +909,6 @@ nextBtn.addEventListener(
   }
 );
 
-
-// ============================================================
-// TODAY
-// ============================================================
 
 todayBtn.addEventListener(
   "click",
@@ -992,7 +920,7 @@ todayBtn.addEventListener(
 
 
 // ============================================================
-// LANGUAGE
+// SELECTORS
 // ============================================================
 
 languageSelect.addEventListener(
@@ -1000,10 +928,6 @@ languageSelect.addEventListener(
   selectionChanged
 );
 
-
-// ============================================================
-// YEAR
-// ============================================================
 
 yearSelect.addEventListener(
   "change",
@@ -1071,7 +995,7 @@ async function saveOffline() {
 
     const response =
       await fetch(
-        GITHUB_RAW_BASE +
+        DATA_FOLDER +
         encodeURIComponent(
           file.name
         ),
@@ -1152,8 +1076,7 @@ async function start() {
 
 
     /*
-      Check whether the saved
-      language/year combination
+      Make sure saved selection
       still exists.
     */
 
@@ -1191,14 +1114,6 @@ async function start() {
         String(selectedYear);
     }
 
-
-    /*
-      Use today's date if that
-      year exists.
-
-      Otherwise begin at January 1
-      of the selected year.
-    */
 
     const today =
       new Date();
