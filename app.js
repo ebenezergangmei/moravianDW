@@ -23,40 +23,60 @@ const nextBtn = document.getElementById("nextBtn");
 
 const calendarBtn = document.getElementById("calendarBtn");
 const calendarPanel = document.getElementById("calendarPanel");
-const calendarMonthTitle = document.getElementById("calendarMonthTitle");
-const calendarDays = document.getElementById("calendarDays");
 const calendarPrevMonth = document.getElementById("calendarPrevMonth");
 const calendarNextMonth = document.getElementById("calendarNextMonth");
+const calendarMonthTitle = document.getElementById("calendarMonthTitle");
+const calendarDays = document.getElementById("calendarDays");
 const calendarTodayBtn = document.getElementById("calendarTodayBtn");
 
 const fontDownBtn = document.getElementById("fontDownBtn");
 const fontUpBtn = document.getElementById("fontUpBtn");
 const fontSizeLabel = document.getElementById("fontSizeLabel");
 
-const offlineBtn = document.getElementById("offlineBtn");
 const installBtn = document.getElementById("installBtn");
 
-const statusBox = document.getElementById("status");
-const contentBox = document.getElementById("watchwordContent");
+const statusEl = document.getElementById("status");
+const contentEl = document.getElementById("watchwordContent");
 
-let files = [];
-let records = [];
+const STORAGE_LANGUAGE = "moravianLanguage";
+const STORAGE_YEAR = "moravianYear";
+const STORAGE_FONT = "moravianFontScale";
+
+const MIN_FONT_SCALE = 80;
+const MAX_FONT_SCALE = 140;
+const FONT_STEP = 10;
+
+let availableFiles = [];
 let selectedLanguage = "";
-let selectedYear = "";
+let selectedYear = 0;
+
+let records = [];
 let currentDate = new Date();
 
-let readerScale = Number(
-  localStorage.getItem("watchwordFontScale") || 100
-);
+let calendarMonth = new Date().getMonth();
+let calendarYear = new Date().getFullYear();
 
-let calendarViewMonth = 0;
-let calendarViewYear = 0;
-let deferredInstallPrompt = null;
+let fontScale =
+  Number(localStorage.getItem(STORAGE_FONT)) || 100;
 
 
-// ============================================================
-// HELPERS
-// ============================================================
+// ------------------------------------------------------------
+// Basic helpers
+// ------------------------------------------------------------
+
+function setStatus(message) {
+  statusEl.textContent = message;
+}
+
+function showError(message) {
+  contentEl.innerHTML = "";
+
+  const error = document.createElement("div");
+  error.className = "error";
+  error.textContent = message;
+
+  contentEl.appendChild(error);
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -67,192 +87,81 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
-function setStatus(text) {
-  statusBox.textContent = text || "";
-}
 
-function showError(text) {
-  contentBox.innerHTML = "";
-  statusBox.innerHTML =
-    '<div class="error">' +
-    escapeHtml(text) +
-    "</div>";
-}
+// ------------------------------------------------------------
+// Date helpers
+// ------------------------------------------------------------
 
-function pad(number) {
-  return String(number).padStart(2, "0");
-}
-
-function dateKey(date) {
-  return (
-    date.getFullYear() +
-    "-" +
-    pad(date.getMonth() + 1) +
-    "-" +
-    pad(date.getDate())
-  );
+function daysInYear(year) {
+  return new Date(year, 1, 29).getMonth() === 1 ? 366 : 365;
 }
 
 function dayOfYear(date) {
   const start = new Date(date.getFullYear(), 0, 1);
-  return Math.floor((date - start) / 86400000) + 1;
+
+  const current = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+
+  return (
+    Math.floor(
+      (current - start) / 86400000
+    ) + 1
+  );
 }
 
-function daysInYear(year) {
-  return new Date(year, 11, 31).getDate() === 31
-    ? Math.floor(
-        (new Date(year + 1, 0, 1) -
-          new Date(year, 0, 1)) / 86400000
-      )
-    : 365;
+function createDateForDay(year, dayNumber) {
+  return new Date(
+    year,
+    0,
+    dayNumber
+  );
+}
+
+function clampDateToYear(date, year) {
+  let month = date.getMonth();
+  let day = date.getDate();
+
+  const maxDay =
+    daysInYear(year);
+
+  const candidate =
+    new Date(year, month, day);
+
+  if (candidate.getFullYear() !== year) {
+    return new Date(year, 0, 1);
+  }
+
+  const candidateDay =
+    dayOfYear(candidate);
+
+  if (candidateDay > maxDay) {
+    return new Date(year, 11, 31);
+  }
+
+  return candidate;
 }
 
 function formatDate(date) {
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "2-digit",
-    year: "numeric"
-  });
-}
-
-function monthName(year, month) {
-  return new Date(year, month, 1).toLocaleDateString(
-    "en-US",
-    { month: "long", year: "numeric" }
+  return date.toLocaleDateString(
+    undefined,
+    {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }
   );
 }
 
 
-// ============================================================
-// FILE LIST
-// ============================================================
+// ------------------------------------------------------------
+// TXT parser
+// ------------------------------------------------------------
 
-function fileInfo(filename) {
-  if (!filename || !filename.toLowerCase().endsWith(".txt")) {
-    return null;
-  }
-
-  const match = filename.match(
-    /^(\d{4})\s+(.+)\.txt$/i
-  );
-
-  if (!match) {
-    return null;
-  }
-
-  return {
-    name: filename,
-    year: Number(match[1]),
-    language: match[2].trim()
-  };
-}
-
-async function loadFileList() {
-  setStatus("Loading Watchword files...");
-
-  const response = await fetch(
-    FILE_LIST + "?v=" + Date.now(),
-    { cache: "no-store" }
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      "Could not read data/files.json (" +
-      response.status +
-      ")."
-    );
-  }
-
-  const list = await response.json();
-
-  if (!Array.isArray(list)) {
-    throw new Error(
-      "data/files.json must contain a JSON array."
-    );
-  }
-
-  files = list
-    .map(fileInfo)
-    .filter(Boolean)
-    .sort(function(a, b) {
-      if (a.year !== b.year) {
-        return a.year - b.year;
-      }
-      return a.language.localeCompare(b.language);
-    });
-
-  if (!files.length) {
-    throw new Error(
-      "No TXT files were found in files.json."
-    );
-  }
-
-  populateSelectors();
-}
-
-function populateSelectors() {
-  const languages = [
-    ...new Set(files.map(file => file.language))
-  ].sort();
-
-  const years = [
-    ...new Set(files.map(file => file.year))
-  ].sort((a, b) => a - b);
-
-  const savedLanguage =
-    localStorage.getItem("watchwordLanguage");
-
-  const savedYear =
-    Number(localStorage.getItem("watchwordYear"));
-
-  selectedLanguage =
-    languages.includes(savedLanguage)
-      ? savedLanguage
-      : languages[0];
-
-  selectedYear =
-    years.includes(savedYear)
-      ? savedYear
-      : years[years.length - 1];
-
-  languageSelect.innerHTML =
-    languages
-      .map(
-        language =>
-          `<option value="${escapeHtml(language)}">${escapeHtml(language)}</option>`
-      )
-      .join("");
-
-  yearSelect.innerHTML =
-    years
-      .map(
-        year =>
-          `<option value="${year}">${year}</option>`
-      )
-      .join("");
-
-  languageSelect.value = selectedLanguage;
-  yearSelect.value = String(selectedYear);
-}
-
-function getSelectedFile() {
-  return files.find(
-    file =>
-      file.language === languageSelect.value &&
-      file.year === Number(yearSelect.value)
-  );
-}
-
-
-// ============================================================
-// TXT PARSER
-//
-// Only # has meaning.
-// Everything between # markers is preserved.
-// ============================================================
-
-function parseFile(text) {
+function parseWatchwordText(text) {
   const normalized =
     text
       .replace(/\r\n/g, "\n")
@@ -263,8 +172,9 @@ function parseFile(text) {
 
   return blocks
     .slice(1)
-    .map(function(block) {
-      const lines = block.split("\n");
+    .map(block => {
+      const lines =
+        block.split("\n");
 
       while (
         lines.length &&
@@ -280,279 +190,546 @@ function parseFile(text) {
         lines.pop();
       }
 
-      return { lines };
+      return {
+        lines
+      };
     })
-    .filter(record => record.lines.length > 0);
+    .filter(record =>
+      record.lines.length > 0
+    );
 }
 
 
-// ============================================================
-// LOAD SELECTED TXT
-// ============================================================
+// ------------------------------------------------------------
+// File name handling
+// ------------------------------------------------------------
 
-async function loadSelectedFile() {
-  const file = getSelectedFile();
+function getFileName(file) {
+  if (typeof file === "string") {
+    return file;
+  }
 
-  if (!file) {
-    showError(
-      "The selected Watchword file was not found."
+  if (file && file.name) {
+    return file.name;
+  }
+
+  return "";
+}
+
+function parseFileInfo(file) {
+  const name =
+    getFileName(file);
+
+  const match =
+    name.match(
+      /^(.+?)\s+(\d{4})\.txt$/i
     );
+
+  if (!match) {
+    return null;
+  }
+
+  return {
+    name,
+    language: match[1].trim(),
+    year: Number(match[2])
+  };
+}
+
+
+// ------------------------------------------------------------
+// Load file list
+// ------------------------------------------------------------
+
+async function loadFileList() {
+  const response =
+    await fetch(
+      FILE_LIST + "?v=" + Date.now(),
+      {
+        cache: "no-store"
+      }
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      "Could not load data/files.json."
+    );
+  }
+
+  const data =
+    await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error(
+      "data/files.json is not a valid file list."
+    );
+  }
+
+  availableFiles =
+    data
+      .map(item => {
+        if (typeof item === "string") {
+          return item;
+        }
+
+        if (item && item.name) {
+          return item.name;
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+}
+
+
+// ------------------------------------------------------------
+// Selectors
+// ------------------------------------------------------------
+
+function getLanguages() {
+  return [
+    ...new Set(
+      availableFiles
+        .map(parseFileInfo)
+        .filter(Boolean)
+        .map(info => info.language)
+    )
+  ].sort((a, b) =>
+    a.localeCompare(b)
+  );
+}
+
+function getYearsForLanguage(language) {
+  return [
+    ...new Set(
+      availableFiles
+        .map(parseFileInfo)
+        .filter(info =>
+          info &&
+          info.language === language
+        )
+        .map(info => info.year)
+    )
+  ].sort((a, b) => a - b);
+}
+
+function findFile(language, year) {
+  return (
+    availableFiles.find(file => {
+      const info =
+        parseFileInfo(file);
+
+      return (
+        info &&
+        info.language === language &&
+        info.year === year
+      );
+    }) || null
+  );
+}
+
+function populateLanguageSelect() {
+  const languages =
+    getLanguages();
+
+  languageSelect.innerHTML = "";
+
+  languages.forEach(language => {
+    const option =
+      document.createElement("option");
+
+    option.value = language;
+    option.textContent = language;
+
+    languageSelect.appendChild(option);
+  });
+
+  if (!languages.length) {
+    languageSelect.innerHTML =
+      '<option value="">No languages</option>';
+
     return;
   }
 
-  selectedLanguage = file.language;
-  selectedYear = file.year;
+  const savedLanguage =
+    localStorage.getItem(
+      STORAGE_LANGUAGE
+    );
 
-  localStorage.setItem(
-    "watchwordLanguage",
-    selectedLanguage
+  if (
+    savedLanguage &&
+    languages.includes(savedLanguage)
+  ) {
+    selectedLanguage =
+      savedLanguage;
+  } else {
+    selectedLanguage =
+      languages[0];
+  }
+
+  languageSelect.value =
+    selectedLanguage;
+}
+
+function populateYearSelect() {
+  const years =
+    getYearsForLanguage(
+      selectedLanguage
+    );
+
+  yearSelect.innerHTML = "";
+
+  years.forEach(year => {
+    const option =
+      document.createElement("option");
+
+    option.value = String(year);
+    option.textContent = String(year);
+
+    yearSelect.appendChild(option);
+  });
+
+  if (!years.length) {
+    yearSelect.innerHTML =
+      '<option value="">No years</option>';
+
+    selectedYear = 0;
+    return;
+  }
+
+  const savedYear =
+    Number(
+      localStorage.getItem(
+        STORAGE_YEAR
+      )
+    );
+
+  if (
+    savedYear &&
+    years.includes(savedYear)
+  ) {
+    selectedYear =
+      savedYear;
+  } else {
+    selectedYear =
+      years[0];
+  }
+
+  yearSelect.value =
+    String(selectedYear);
+}
+
+
+// ------------------------------------------------------------
+// Watchword file loading
+// ------------------------------------------------------------
+
+async function loadSelectedFile() {
+  const fileName =
+    findFile(
+      selectedLanguage,
+      selectedYear
+    );
+
+  if (!fileName) {
+    records = [];
+
+    showError(
+      "No Watchword file found for " +
+      selectedLanguage +
+      " " +
+      selectedYear +
+      "."
+    );
+
+    setStatus(
+      "Please choose another language or year."
+    );
+
+    return false;
+  }
+
+  setStatus(
+    "Loading Watchword files..."
   );
-
-  localStorage.setItem(
-    "watchwordYear",
-    String(selectedYear)
-  );
-
-  setStatus("Loading " + file.name + "...");
 
   try {
-    const response = await fetch(
+    const url =
       DATA_FOLDER +
-        encodeURIComponent(file.name) +
-        "?v=" +
-        Date.now(),
-      { cache: "no-store" }
-    );
+      encodeURIComponent(fileName);
+
+    const response =
+      await fetch(
+        url + "?v=" + Date.now(),
+        {
+          cache: "no-store"
+        }
+      );
 
     if (!response.ok) {
       throw new Error(
-        file.name +
-        " returned HTTP " +
-        response.status +
-        "."
+        "Could not load " +
+        fileName
       );
     }
 
-    const text = await response.text();
+    const text =
+      await response.text();
 
-    records = parseFile(text);
+    const parsed =
+      parseWatchwordText(text);
 
     const expected =
       daysInYear(selectedYear);
 
-    if (records.length !== expected) {
+    if (parsed.length !== expected) {
+      records = [];
+
       showError(
-        "This Watchword file cannot be loaded.\n\n" +
-        file.name +
+        "Invalid Watchword file: " +
+        fileName +
         "\n\n" +
-        "Calendar days: " +
+        "The file contains " +
+        parsed.length +
+        " # sections, but " +
+        selectedYear +
+        " requires " +
         expected +
-        "\n" +
-        "# sections found: " +
-        records.length +
-        "\n\n" +
-        "The number of # sections must exactly match " +
-        "the number of days in the selected year."
+        " sections.\n\n" +
+        "Please choose another language or year."
       );
 
-      updateNavigationButtons();
-      renderCalendar();
-      return;
+      setStatus(
+        "Watchword file validation failed."
+      );
+
+      return false;
     }
+
+    records = parsed;
+
+    localStorage.setItem(
+      STORAGE_LANGUAGE,
+      selectedLanguage
+    );
+
+    localStorage.setItem(
+      STORAGE_YEAR,
+      String(selectedYear)
+    );
+
+    if (
+      currentDate.getFullYear() !==
+      selectedYear
+    ) {
+      currentDate =
+        new Date(
+          selectedYear,
+          0,
+          1
+        );
+    } else {
+      currentDate =
+        clampDateToYear(
+          currentDate,
+          selectedYear
+        );
+    }
+
+    calendarYear =
+      selectedYear;
+
+    calendarMonth =
+      currentDate.getMonth();
+
+    updateNavigationButtons();
+    renderCurrentRecord();
+    renderCalendar();
 
     setStatus("");
 
-    displayCurrentDate();
-    renderCalendar();
+    return true;
 
   } catch (error) {
-    console.error(error);
+    records = [];
 
     showError(
-      "Could not load " +
-      file.name +
-      ".\n\n" +
-      error.message
+      "Error loading Watchword file:\n\n" +
+      String(
+        error &&
+        error.message
+          ? error.message
+          : error
+      )
     );
+
+    setStatus(
+      "Could not load Watchword file."
+    );
+
+    return false;
   }
 }
 
 
-// ============================================================
-// DATE → SECTION NUMBER
-//
-// No date is read from TXT.
-// ============================================================
+// ------------------------------------------------------------
+// Display current Watchword
+// ------------------------------------------------------------
 
-function getRecordForDate(date) {
-  const index = dayOfYear(date) - 1;
-  return records[index] || null;
+function getCurrentRecord() {
+  if (!records.length) {
+    return null;
+  }
+
+  if (
+    currentDate.getFullYear() !==
+    selectedYear
+  ) {
+    return null;
+  }
+
+  const index =
+    dayOfYear(currentDate) - 1;
+
+  if (
+    index < 0 ||
+    index >= records.length
+  ) {
+    return null;
+  }
+
+  return records[index];
 }
 
+function renderCurrentRecord() {
+  contentEl.innerHTML = "";
 
-// ============================================================
-// DISPLAY TXT
-// ============================================================
+  const record =
+    getCurrentRecord();
 
-function displayRecord(record, date) {
   if (!record) {
-    contentBox.innerHTML =
-      '<div class="error">' +
+    showError(
       "No Watchword record found for " +
-      escapeHtml(formatDate(date)) +
-      "." +
-      "</div>";
+      formatDate(currentDate) +
+      "."
+    );
+
     return;
   }
 
-  let html = "";
+  const entry =
+    document.createElement("div");
 
-  for (const line of record.lines) {
-    if (line.trim() === "") {
-      continue;
-    }
+  entry.className = "entry";
 
-    html +=
-      '<div class="txt-line">' +
-      escapeHtml(line.trim()) +
-      "</div>";
-  }
+  record.lines.forEach(line => {
+    const lineEl =
+      document.createElement("div");
 
-  contentBox.innerHTML =
-    '<article class="entry">' +
-    html +
-    "</article>";
+    lineEl.className =
+      "txt-line";
+
+    lineEl.innerHTML =
+      escapeHtml(line);
+
+    entry.appendChild(lineEl);
+  });
+
+  contentEl.appendChild(entry);
 }
 
-function displayCurrentDate() {
-  const record =
-    getRecordForDate(currentDate);
 
-  displayRecord(
-    record,
-    currentDate
-  );
+// ------------------------------------------------------------
+// Navigation
+// ------------------------------------------------------------
 
+function updateNavigationButtons() {
+  if (!selectedYear) {
+    previousBtn.disabled = true;
+    nextBtn.disabled = true;
+    return;
+  }
+
+  const day =
+    dayOfYear(currentDate);
+
+  const total =
+    daysInYear(selectedYear);
+
+  previousBtn.disabled =
+    day <= 1;
+
+  nextBtn.disabled =
+    day >= total;
+}
+
+function goPrevious() {
+  if (
+    !records.length ||
+    dayOfYear(currentDate) <= 1
+  ) {
+    return;
+  }
+
+  currentDate =
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() - 1
+    );
+
+  calendarYear =
+    selectedYear;
+
+  calendarMonth =
+    currentDate.getMonth();
+
+  renderCurrentRecord();
+  renderCalendar();
   updateNavigationButtons();
 }
 
-
-// ============================================================
-// NAVIGATION
-// ============================================================
-
-function moveDate(days) {
-  const newDate =
-    new Date(currentDate);
-
-  newDate.setDate(
-    newDate.getDate() + days
-  );
-
+function goNext() {
   if (
-    newDate.getFullYear() !==
-    Number(selectedYear)
+    !records.length ||
+    dayOfYear(currentDate) >=
+      daysInYear(selectedYear)
   ) {
     return;
   }
 
-  currentDate = newDate;
+  currentDate =
+    new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate() + 1
+    );
 
-  displayCurrentDate();
+  calendarYear =
+    selectedYear;
+
+  calendarMonth =
+    currentDate.getMonth();
+
+  renderCurrentRecord();
   renderCalendar();
+  updateNavigationButtons();
 }
 
-async function goToday() {
-  const today = new Date();
-  const todayYear = today.getFullYear();
-
-  if (
-    files.some(
-      file =>
-        file.year === todayYear &&
-        file.language ===
-          languageSelect.value
-    )
-  ) {
-    if (
-      Number(yearSelect.value) !==
-      todayYear
-    ) {
-      yearSelect.value =
-        String(todayYear);
-
-      selectedYear = todayYear;
-
-      await loadSelectedFile();
-    }
-
-    currentDate = today;
-  } else {
-    currentDate =
-      new Date(
-        Number(selectedYear),
-        0,
-        1
-      );
-  }
-
-  displayCurrentDate();
-  renderCalendar();
-}
-
-previousBtn.addEventListener(
-  "click",
-  function() {
-    moveDate(-1);
-  }
-);
-
-nextBtn.addEventListener(
-  "click",
-  function() {
-    moveDate(1);
-  }
-);
-
-languageSelect.addEventListener(
-  "change",
-  selectionChanged
-);
-
-yearSelect.addEventListener(
-  "change",
-  selectionChanged
-);
-
-todayBtn.addEventListener(
-  "click",
-  goToday
-);
-
-async function selectionChanged() {
-  selectedLanguage =
-    languageSelect.value;
-
-  selectedYear =
-    Number(yearSelect.value);
-
-  localStorage.setItem(
-    "watchwordLanguage",
-    selectedLanguage
-  );
-
-  localStorage.setItem(
-    "watchwordYear",
-    String(selectedYear)
-  );
-
-  const today = new Date();
+function goToday() {
+  const today =
+    new Date();
 
   if (
     today.getFullYear() ===
     selectedYear
   ) {
-    currentDate = today;
+    currentDate =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
   } else {
     currentDate =
       new Date(
@@ -562,118 +739,156 @@ async function selectionChanged() {
       );
   }
 
-  await loadSelectedFile();
+  calendarYear =
+    selectedYear;
 
-  calendarViewYear =
-    currentDate.getFullYear();
+  calendarMonth =
+    currentDate.getMonth();
 
-  calendarViewMonth =
+  renderCurrentRecord();
+  renderCalendar();
+  updateNavigationButtons();
+}
+
+
+// ------------------------------------------------------------
+// Calendar
+// ------------------------------------------------------------
+
+function renderCalendar() {
+  if (!selectedYear) {
+    return;
+  }
+
+  calendarMonthTitle.textContent =
+    new Date(
+      calendarYear,
+      calendarMonth,
+      1
+    ).toLocaleDateString(
+      undefined,
+      {
+        month: "long",
+        year: "numeric"
+      }
+    );
+
+  calendarDays.innerHTML = "";
+
+  const firstDay =
+    new Date(
+      calendarYear,
+      calendarMonth,
+      1
+    ).getDay();
+
+  const totalDays =
+    new Date(
+      calendarYear,
+      calendarMonth + 1,
+      0
+    ).getDate();
+
+  for (
+    let i = 0;
+    i < firstDay;
+    i++
+  ) {
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty";
+
+    calendarDays.appendChild(empty);
+  }
+
+  for (
+    let day = 1;
+    day <= totalDays;
+    day++
+  ) {
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+    button.textContent = String(day);
+
+    const thisDate =
+      new Date(
+        calendarYear,
+        calendarMonth,
+        day
+      );
+
+    if (
+      currentDate.getFullYear() ===
+        calendarYear &&
+      currentDate.getMonth() ===
+        calendarMonth &&
+      currentDate.getDate() ===
+        day
+    ) {
+      button.classList.add(
+        "selected-day"
+      );
+    }
+
+    const today =
+      new Date();
+
+    if (
+      today.getFullYear() ===
+        calendarYear &&
+      today.getMonth() ===
+        calendarMonth &&
+      today.getDate() ===
+        day
+    ) {
+      button.classList.add(
+        "today-day"
+      );
+    }
+
+    button.addEventListener(
+      "click",
+      () => {
+        currentDate =
+          thisDate;
+
+        calendarYear =
+          selectedYear;
+
+        calendarMonth =
+          currentDate.getMonth();
+
+        renderCurrentRecord();
+        renderCalendar();
+        updateNavigationButtons();
+
+        closeCalendar();
+      }
+    );
+
+    calendarDays.appendChild(button);
+  }
+}
+
+function openCalendar() {
+  calendarPanel.hidden = false;
+
+  calendarBtn.setAttribute(
+    "aria-expanded",
+    "true"
+  );
+
+  calendarYear =
+    selectedYear;
+
+  calendarMonth =
     currentDate.getMonth();
 
   renderCalendar();
-}
-
-
-// ============================================================
-// BUTTON STATE
-// ============================================================
-
-function updateNavigationButtons() {
-  const firstDay =
-    new Date(
-      Number(selectedYear),
-      0,
-      1
-    );
-
-  const lastDay =
-    new Date(
-      Number(selectedYear),
-      11,
-      31
-    );
-
-  previousBtn.disabled =
-    dateKey(currentDate) ===
-    dateKey(firstDay);
-
-  nextBtn.disabled =
-    dateKey(currentDate) ===
-    dateKey(lastDay);
-}
-
-
-// ============================================================
-// FONT SIZE
-// ============================================================
-
-function applyFontScale() {
-  readerScale =
-    Math.max(
-      70,
-      Math.min(
-        150,
-        readerScale
-      )
-    );
-
-  const size =
-    18 * readerScale / 100;
-
-  document.documentElement.style.setProperty(
-    "--reader-size",
-    size + "px"
-  );
-
-  fontSizeLabel.textContent =
-    readerScale + "%";
-
-  localStorage.setItem(
-    "watchwordFontScale",
-    String(readerScale)
-  );
-}
-
-fontDownBtn.addEventListener(
-  "click",
-  function() {
-    readerScale -= 5;
-    applyFontScale();
-  }
-);
-
-fontUpBtn.addEventListener(
-  "click",
-  function() {
-    readerScale += 5;
-    applyFontScale();
-  }
-);
-
-
-// ============================================================
-// CALENDAR
-// ============================================================
-
-function openCalendar() {
-  if (calendarPanel.hidden) {
-    calendarViewYear =
-      currentDate.getFullYear();
-
-    calendarViewMonth =
-      currentDate.getMonth();
-
-    calendarPanel.hidden = false;
-
-    calendarBtn.setAttribute(
-      "aria-expanded",
-      "true"
-    );
-
-    renderCalendar();
-  } else {
-    closeCalendar();
-  }
 }
 
 function closeCalendar() {
@@ -685,367 +900,295 @@ function closeCalendar() {
   );
 }
 
-function renderCalendar() {
-  if (!calendarViewYear) {
-    calendarViewYear =
-      currentDate.getFullYear();
-  }
-
-  if (
-    calendarViewYear !==
-    Number(selectedYear)
-  ) {
-    calendarViewYear =
-      Number(selectedYear);
-  }
-
-  calendarMonthTitle.textContent =
-    monthName(
-      calendarViewYear,
-      calendarViewMonth
-    );
-
-  calendarDays.innerHTML = "";
-
-  const firstDay =
-    new Date(
-      calendarViewYear,
-      calendarViewMonth,
-      1
-    );
-
-  const lastDay =
-    new Date(
-      calendarViewYear,
-      calendarViewMonth + 1,
-      0
-    );
-
-  const firstWeekday =
-    firstDay.getDay();
-
-  for (
-    let i = 0;
-    i < firstWeekday;
-    i++
-  ) {
-    const empty =
-      document.createElement("span");
-
-    empty.className = "empty";
-
-    calendarDays.appendChild(
-      empty
-    );
-  }
-
-  for (
-    let day = 1;
-    day <= lastDay.getDate();
-    day++
-  ) {
-    const button =
-      document.createElement("button");
-
-    button.type = "button";
-    button.textContent = day;
-
-    const thisDate =
-      new Date(
-        calendarViewYear,
-        calendarViewMonth,
-        day
-      );
-
-    if (
-      dateKey(thisDate) ===
-      dateKey(currentDate)
-    ) {
-      button.classList.add(
-        "selected-day"
-      );
-    }
-
-    const realToday =
-      new Date();
-
-    if (
-      dateKey(thisDate) ===
-      dateKey(realToday)
-    ) {
-      button.classList.add(
-        "today-day"
-      );
-    }
-
-    button.addEventListener(
-      "click",
-      function() {
-        chooseCalendarDate(
-          thisDate
-        );
-      }
-    );
-
-    calendarDays.appendChild(
-      button
-    );
+function toggleCalendar() {
+  if (calendarPanel.hidden) {
+    openCalendar();
+  } else {
+    closeCalendar();
   }
 }
 
-function changeCalendarMonth(delta) {
-  let nextMonth =
-    calendarViewMonth + delta;
+function previousCalendarMonth() {
+  calendarMonth--;
 
-  let nextYear =
-    calendarViewYear;
-
-  if (nextMonth < 0) {
-    nextMonth = 11;
-    nextYear--;
-  }
-
-  if (nextMonth > 11) {
-    nextMonth = 0;
-    nextYear++;
+  if (calendarMonth < 0) {
+    calendarMonth = 11;
+    calendarYear--;
   }
 
   if (
-    nextYear !==
-    Number(selectedYear)
+    calendarYear !==
+    selectedYear
   ) {
-    return;
+    calendarYear =
+      selectedYear;
+    calendarMonth =
+      calendarMonth < 0
+        ? 0
+        : calendarMonth;
   }
-
-  calendarViewMonth =
-    nextMonth;
-
-  calendarViewYear =
-    nextYear;
 
   renderCalendar();
 }
 
-function chooseCalendarDate(date) {
+function nextCalendarMonth() {
+  calendarMonth++;
+
+  if (calendarMonth > 11) {
+    calendarMonth = 0;
+    calendarYear++;
+  }
+
   if (
-    date.getFullYear() !==
-    Number(selectedYear)
+    calendarYear !==
+    selectedYear
   ) {
+    calendarYear =
+      selectedYear;
+    calendarMonth =
+      calendarMonth > 11
+        ? 11
+        : calendarMonth;
+  }
+
+  renderCalendar();
+}
+
+function calendarGoToday() {
+  const today =
+    new Date();
+
+  if (
+    today.getFullYear() ===
+    selectedYear
+  ) {
+    currentDate =
+      new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+  } else {
+    currentDate =
+      new Date(
+        selectedYear,
+        0,
+        1
+      );
+  }
+
+  calendarYear =
+    selectedYear;
+
+  calendarMonth =
+    currentDate.getMonth();
+
+  renderCurrentRecord();
+  renderCalendar();
+  updateNavigationButtons();
+
+  closeCalendar();
+}
+
+
+// ------------------------------------------------------------
+// Font controls
+// ------------------------------------------------------------
+
+function applyFontSize() {
+  fontScale =
+    Math.max(
+      MIN_FONT_SCALE,
+      Math.min(
+        MAX_FONT_SCALE,
+        fontScale
+      )
+    );
+
+  const baseSize =
+    18;
+
+  const size =
+    baseSize *
+    (fontScale / 100);
+
+  document.documentElement.style.setProperty(
+    "--reader-size",
+    size + "px"
+  );
+
+  fontSizeLabel.textContent =
+    fontScale + "%";
+
+  localStorage.setItem(
+    STORAGE_FONT,
+    String(fontScale)
+  );
+}
+
+function decreaseFont() {
+  fontScale -= FONT_STEP;
+  applyFontSize();
+}
+
+function increaseFont() {
+  fontScale += FONT_STEP;
+  applyFontSize();
+}
+
+
+// ------------------------------------------------------------
+// Language / Year changes
+// ------------------------------------------------------------
+
+async function changeLanguage() {
+  selectedLanguage =
+    languageSelect.value;
+
+  localStorage.setItem(
+    STORAGE_LANGUAGE,
+    selectedLanguage
+  );
+
+  populateYearSelect();
+
+  const availableYears =
+    getYearsForLanguage(
+      selectedLanguage
+    );
+
+  if (!availableYears.length) {
+    records = [];
+
+    showError(
+      "No Watchword years are available for " +
+      selectedLanguage +
+      "."
+    );
+
     return;
   }
 
   currentDate =
     new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
+      selectedYear,
+      0,
+      1
     );
 
-  displayCurrentDate();
-  renderCalendar();
-  closeCalendar();
+  calendarYear =
+    selectedYear;
+
+  calendarMonth = 0;
+
+  await loadSelectedFile();
 }
 
-calendarBtn.addEventListener(
-  "click",
-  openCalendar
-);
+async function changeYear() {
+  const newYear =
+    Number(yearSelect.value);
 
-calendarPrevMonth.addEventListener(
-  "click",
-  function() {
-    changeCalendarMonth(-1);
-  }
-);
-
-calendarNextMonth.addEventListener(
-  "click",
-  function() {
-    changeCalendarMonth(1);
-  }
-);
-
-calendarTodayBtn.addEventListener(
-  "click",
-  async function() {
-    const today =
-      new Date();
-
-    if (
-      today.getFullYear() ===
-      Number(selectedYear)
-    ) {
-      currentDate = today;
-    } else {
-      currentDate =
-        new Date(
-          Number(selectedYear),
-          0,
-          1
-        );
-    }
-
-    calendarViewYear =
-      currentDate.getFullYear();
-
-    calendarViewMonth =
-      currentDate.getMonth();
-
-    displayCurrentDate();
-    renderCalendar();
-  }
-);
-
-document.addEventListener(
-  "click",
-  function(event) {
-    if (
-      !calendarPanel.hidden &&
-      !event.target.closest(".calendar-wrap")
-    ) {
-      closeCalendar();
-    }
-  }
-);
-
-
-// ============================================================
-// SAVE OFFLINE
-//
-// Saves the selected TXT in local storage, while the PWA
-// service worker caches the application and listed TXT files.
-// ============================================================
-
-async function saveOffline() {
-  const file =
-    getSelectedFile();
-
-  if (!file) {
+  if (!newYear) {
     return;
   }
 
-  try {
-    const response =
-      await fetch(
-        DATA_FOLDER +
-        encodeURIComponent(
-          file.name
-        ),
-        { cache: "no-store" }
-      );
+  selectedYear =
+    newYear;
 
-    if (!response.ok) {
-      throw new Error(
-        "Could not download the Watchword file."
-      );
-    }
+  localStorage.setItem(
+    STORAGE_YEAR,
+    String(selectedYear)
+  );
 
-    const text =
-      await response.text();
-
-    localStorage.setItem(
-      "watchwordOffline_" +
-      file.name,
-      text
+  currentDate =
+    clampDateToYear(
+      currentDate,
+      selectedYear
     );
 
-    offlineBtn.classList.add(
-      "saved"
-    );
+  calendarYear =
+    selectedYear;
 
-    offlineBtn.textContent =
-      "✓ Saved Offline";
+  calendarMonth =
+    currentDate.getMonth();
 
-  } catch (error) {
-    console.error(error);
-
-    offlineBtn.textContent =
-      "Save Failed";
-
-    setTimeout(
-      function() {
-        offlineBtn.textContent =
-          "💾 Save Offline";
-      },
-      2000
-    );
-  }
+  await loadSelectedFile();
 }
 
-offlineBtn.addEventListener(
-  "click",
-  saveOffline
-);
 
+// ------------------------------------------------------------
+// Install App
+// ------------------------------------------------------------
 
-// ============================================================
-// PWA INSTALL
-// ============================================================
+let deferredInstallPrompt =
+  null;
 
-window.addEventListener(
-  "beforeinstallprompt",
-  function(event) {
-    event.preventDefault();
+if (installBtn) {
+  window.addEventListener(
+    "beforeinstallprompt",
+    event => {
+      event.preventDefault();
 
-    deferredInstallPrompt =
-      event;
+      deferredInstallPrompt =
+        event;
 
-    installBtn.hidden = false;
-  }
-);
-
-installBtn.addEventListener(
-  "click",
-  async function() {
-    if (!deferredInstallPrompt) {
-      return;
+      installBtn.hidden =
+        false;
     }
+  );
 
-    deferredInstallPrompt.prompt();
+  installBtn.addEventListener(
+    "click",
+    async () => {
+      if (!deferredInstallPrompt) {
+        return;
+      }
 
-    const result =
-      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt.prompt();
 
-    if (
-      result &&
-      result.outcome ===
-        "accepted"
-    ) {
-      installBtn.hidden = true;
+      try {
+        await deferredInstallPrompt.userChoice;
+      } catch (error) {
+        console.log(
+          "Install prompt error:",
+          error
+        );
+      }
+
+      deferredInstallPrompt =
+        null;
+
+      installBtn.hidden =
+        true;
     }
+  );
 
-    deferredInstallPrompt =
-      null;
-  }
-);
-
-window.addEventListener(
-  "appinstalled",
-  function() {
-    installBtn.hidden = true;
-
-    setStatus(
-      "Moravian Daily Watchwords is installed on this device."
-    );
-  }
-);
+  window.addEventListener(
+    "appinstalled",
+    () => {
+      installBtn.hidden =
+        true;
+    }
+  );
+}
 
 
-// ============================================================
-// SERVICE WORKER
-// ============================================================
+// ------------------------------------------------------------
+// Service worker
+// ------------------------------------------------------------
 
-if ("serviceWorker" in navigator) {
+if (
+  "serviceWorker" in navigator
+) {
   window.addEventListener(
     "load",
-    function() {
+    () => {
       navigator.serviceWorker
         .register(
-          "service-worker.js",
-          { scope: "./" }
+          "./service-worker.js"
         )
-        .catch(function(error) {
-          console.error(
+        .catch(error => {
+          console.log(
             "Service worker registration failed:",
             error
           );
@@ -1055,40 +1198,94 @@ if ("serviceWorker" in navigator) {
 }
 
 
-// ============================================================
-// START
-// ============================================================
+// ------------------------------------------------------------
+// Event handlers
+// ------------------------------------------------------------
 
-async function start() {
+languageSelect.addEventListener(
+  "change",
+  changeLanguage
+);
+
+yearSelect.addEventListener(
+  "change",
+  changeYear
+);
+
+previousBtn.addEventListener(
+  "click",
+  goPrevious
+);
+
+nextBtn.addEventListener(
+  "click",
+  goNext
+);
+
+todayBtn.addEventListener(
+  "click",
+  goToday
+);
+
+calendarBtn.addEventListener(
+  "click",
+  toggleCalendar
+);
+
+calendarPrevMonth.addEventListener(
+  "click",
+  previousCalendarMonth
+);
+
+calendarNextMonth.addEventListener(
+  "click",
+  nextCalendarMonth
+);
+
+calendarTodayBtn.addEventListener(
+  "click",
+  calendarGoToday
+);
+
+fontDownBtn.addEventListener(
+  "click",
+  decreaseFont
+);
+
+fontUpBtn.addEventListener(
+  "click",
+  increaseFont
+);
+
+
+// ------------------------------------------------------------
+// Start application
+// ------------------------------------------------------------
+
+async function startApp() {
   try {
-    applyFontScale();
+    setStatus(
+      "Loading Watchword files..."
+    );
 
     await loadFileList();
 
-    const exists =
-      files.some(
-        file =>
-          file.language ===
-            selectedLanguage &&
-          file.year ===
-            selectedYear
+    if (!availableFiles.length) {
+      throw new Error(
+        "No Watchword files were found in data/files.json."
       );
+    }
 
-    if (!exists) {
-      const first =
-        files[files.length - 1];
+    populateLanguageSelect();
+    populateYearSelect();
 
-      selectedLanguage =
-        first.language;
-
-      selectedYear =
-        first.year;
-
-      languageSelect.value =
-        selectedLanguage;
-
-      yearSelect.value =
-        String(selectedYear);
+    if (
+      !selectedLanguage ||
+      !selectedYear
+    ) {
+      throw new Error(
+        "Could not determine the available language and year."
+      );
     }
 
     const today =
@@ -1096,9 +1293,14 @@ async function start() {
 
     if (
       today.getFullYear() ===
-      Number(selectedYear)
+      selectedYear
     ) {
-      currentDate = today;
+      currentDate =
+        new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate()
+        );
     } else {
       currentDate =
         new Date(
@@ -1108,25 +1310,31 @@ async function start() {
         );
     }
 
-    calendarViewYear =
-      currentDate.getFullYear();
+    calendarYear =
+      selectedYear;
 
-    calendarViewMonth =
+    calendarMonth =
       currentDate.getMonth();
+
+    applyFontSize();
 
     await loadSelectedFile();
 
   } catch (error) {
-    console.error(
-      "START ERROR:",
-      error
+    showError(
+      "Application loading error:\n\n" +
+      String(
+        error &&
+        error.message
+          ? error.message
+          : error
+      )
     );
 
-    showError(
-      "Could not start the Watchword application.\n\n" +
-      error.message
+    setStatus(
+      "Could not load Watchword files."
     );
   }
 }
 
-start();
+startApp();
