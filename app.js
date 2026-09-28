@@ -1121,12 +1121,6 @@ async function changeYear() {
 let deferredInstallPrompt =
   null;
 
-// When the Blogger "Install Web App" button opens this page with
-// ?install=1, automatically prepare the native PWA installation prompt.
-// A fallback button remains available if the browser requires a user gesture.
-const installRouteRequested =
-  new URLSearchParams(window.location.search).get("install") === "1";
-
 if (installBtn) {
   window.addEventListener(
     "beforeinstallprompt",
@@ -1138,21 +1132,6 @@ if (installBtn) {
 
       installBtn.hidden =
         false;
-
-      if (installRouteRequested) {
-        // Give the browser a moment to finish the installability checks.
-        // If the browser permits a programmatic prompt, this opens it here.
-        setTimeout(async () => {
-          if (!deferredInstallPrompt) return;
-
-          try {
-            deferredInstallPrompt.prompt();
-            await deferredInstallPrompt.userChoice;
-          } catch (error) {
-            console.log("Automatic install prompt unavailable:", error);
-          }
-        }, 300);
-      }
     }
   );
 
