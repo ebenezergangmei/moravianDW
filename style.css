@@ -22,18 +22,19 @@ body {
   padding: 22px 12px 20px;
 }
 
-.header-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+.header-logo {
+  display: block;
+  width: 84px;
+  height: 84px;
+  margin: 10px auto 0;
+  object-fit: contain;
 }
 
-.header-icon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  flex: 0 0 auto;
+.header-tagline {
+  margin: 6px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: #cbd2e0;
 }
 
 .site-header h1 {
@@ -318,8 +319,8 @@ button:disabled { opacity: 0.45; cursor: default; }
 .txt-line {
   width: 100%;
   margin: 0 auto;
-  padding: 0 4px 14px;
-  margin-bottom: 14px;
+  padding: 0 4px 7px;
+  margin-bottom: 7px;
   border-bottom: 1px solid #e5e7eb;
   font-size: var(--reader-size, 18px);
   line-height: 1.55;
@@ -369,12 +370,9 @@ button:disabled { opacity: 0.45; cursor: default; }
 @media (max-width: 700px) {
   .site-header { padding: 9px 6px 8px; }
 
-  .header-title { gap: 7px; }
+  .header-logo { width: 56px; height: 56px; margin-top: 6px; }
 
-  .header-icon {
-    width: 30px;
-    height: 30px;
-  }
+  .header-tagline { font-size: 11px; margin-top: 3px; }
 
   .site-header h1 { font-size: 20px; line-height: 1.15; }
 
@@ -458,8 +456,8 @@ button:disabled { opacity: 0.45; cursor: default; }
   .entry { margin-top: 5px; padding: 9px 3px 18px; }
 
   .txt-line {
-    padding: 0 4px 11px;
-    margin-bottom: 11px;
+    padding: 0 4px 5.5px;
+    margin-bottom: 5.5px;
     font-size: var(--reader-size, 16px);
     line-height: 1.45;
   }
@@ -473,10 +471,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 @media (max-width: 380px) {
   .site-header h1 { font-size: 18px; }
 
-  .header-icon {
-    width: 26px;
-    height: 26px;
-  }
+  .header-logo { width: 48px; height: 48px; }
 
   .txt-line {
     font-size: var(--reader-size, 15px);
@@ -486,3 +481,8 @@ button:disabled { opacity: 0.45; cursor: default; }
 
 #offlineStatus:empty, #installHelp[hidden] { display: none; }
 #installHelp { line-height: 1.5; }
+
+.footer-copy {
+  margin-top: 6px;
+  font-size: 12px;
+}
