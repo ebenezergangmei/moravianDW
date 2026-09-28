@@ -1135,32 +1135,26 @@ if (installBtn) {
     }
   );
 
-  installBtn.addEventListener(
-    "click",
-    async () => {
-     if (!deferredInstallPrompt) {
-        alert("Please use your browser's menu and choose 'Install App' or 'Add to Home Screen'.");
-        return;
-      }
-
+  installBtn.addEventListener("click", async () => {
+    if (deferredInstallPrompt) {
       deferredInstallPrompt.prompt();
-
-      try {
-        await deferredInstallPrompt.userChoice;
-      } catch (error) {
-        console.log(
-          "Install prompt error:",
-          error
-        );
-      }
-
-      deferredInstallPrompt =
-        null;
-
-      installBtn.hidden =
-        true;
+      try { await deferredInstallPrompt.userChoice; } catch (e) {}
+      deferredInstallPrompt = null;
+      return;
     }
-  );
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const help = document.getElementById("installHelp");
+    if (isIOS) {
+      help.textContent = "iPhone / iPad: open this page in Safari, tap the Share button, then choose 'Add to Home Screen'.";
+    } else if (/Macintosh/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Edg/.test(ua)) {
+      help.textContent = "Mac Safari: choose File > Add to Dock.";
+    } else {
+      help.textContent = "Open your browser menu and choose 'Install app' or 'Add to Home screen'.";
+    }
+    help.hidden = false;
+  });
 
   window.addEventListener(
     "appinstalled",
@@ -1337,3 +1331,61 @@ async function startApp() {
 }
 
 startApp();
+
+
+// ------------------------------------------------------------
+// Offline download + status
+// ------------------------------------------------------------
+
+const offlineBtn = document.getElementById("offlineBtn");
+const offlineStatus = document.getElementById("offlineStatus");
+const OFFLINE_CACHE = "moravian-watchword-pwa-v3";
+
+// Hide install button if already running as an installed app.
+if (installBtn &&
+    (window.matchMedia("(display-mode: standalone)").matches ||
+     navigator.standalone === true)) {
+  installBtn.hidden = true;
+}
+
+// Ask the browser not to delete the saved data.
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persist().catch(() => {});
+}
+
+async function downloadForOffline() {
+  if (!("caches" in window)) {
+    offlineStatus.textContent = "This browser does not support offline storage.";
+    return;
+  }
+  if (!navigator.onLine) {
+    offlineStatus.textContent = "You are offline. Connect to the internet first.";
+    return;
+  }
+  offlineBtn.disabled = true;
+  try {
+    const cache = await caches.open(OFFLINE_CACHE);
+    const strip = u => { const x = new URL(u, location.href); x.search = ""; return x.toString(); };
+    const list = await (await fetch("data/files.json?v=" + Date.now(), { cache: "no-store" })).json();
+    const names = list.map(i => typeof i === "string" ? i : i && i.name).filter(Boolean);
+    const urls = ["data/files.json", ...names.map(n => "data/" + encodeURIComponent(n))];
+    let done = 0;
+    for (const u of urls) {
+      const r = await fetch(u + "?v=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error("Could not download " + u);
+      await cache.put(strip(u), r);
+      done++;
+      offlineStatus.textContent = "Downloading " + done + " of " + urls.length + "...";
+    }
+    offlineStatus.textContent = "Done. All " + names.length + " Watchword files are saved for offline use.";
+  } catch (e) {
+    offlineStatus.textContent = "Download failed: " + (e && e.message ? e.message : e);
+  } finally {
+    offlineBtn.disabled = false;
+  }
+}
+
+if (offlineBtn) offlineBtn.addEventListener("click", downloadForOffline);
+
+window.addEventListener("offline", () => { offlineStatus.textContent = "You are offline. Saved files still work."; });
+window.addEventListener("online", () => { offlineStatus.textContent = ""; });
