@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#121826">
   <meta name="description" content="Moravian Daily Watchwords">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Moravian Daily Watchwords</title>
+  <meta name="apple-mobile-web-app-title" content="Watchwords">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="header-title">
+      <img src="icons/icon-192.png" alt="" class="header-icon">
       <h1>Moravian Daily Watchwords</h1>
-      <div class="header-subtitle">Multilingual Moravian Daily Texts</div>
+      <img src="icons/icon-192.png" alt="" class="header-icon">
     </div>
-    <img src="icons/icon-192.png" alt="Moravian Watchwords" class="header-logo">
   </header>
 
   <main class="container">
@@ -85,7 +87,11 @@
 
       <div class="offline-controls">
        <button id="installBtn" type="button" class="install-button">📲 Install App</button>
+       <button id="offlineBtn" type="button" class="install-button">⬇ Download for Offline</button>
       </div>
+
+      <div id="offlineStatus" class="status"></div>
+      <div id="installHelp" class="status" hidden></div>
 
       <div id="status" class="status">Loading Watchword files...</div>
     </section>
