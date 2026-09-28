@@ -1339,7 +1339,7 @@ startApp();
 
 const offlineBtn = document.getElementById("offlineBtn");
 const offlineStatus = document.getElementById("offlineStatus");
-const OFFLINE_CACHE = "moravian-watchword-pwa-v3";
+const OFFLINE_CACHE = "moravian-watchword-pwa-v4";
 
 // Hide install button if already running as an installed app.
 if (installBtn &&
