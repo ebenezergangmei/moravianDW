@@ -369,7 +369,7 @@ function populateLanguageSelect() {
     selectedLanguage;
 }
 
-function populateYearSelect() {
+function populateYearSelect(preferredYear) {
   const years =
     getYearsForLanguage(
       selectedLanguage
@@ -395,22 +395,22 @@ function populateYearSelect() {
     return;
   }
 
-  const savedYear =
-    Number(
-      localStorage.getItem(
-        STORAGE_YEAR
-      )
-    );
+  const thisYear = new Date().getFullYear();
 
   if (
-    savedYear &&
-    years.includes(savedYear)
+    preferredYear &&
+    years.includes(preferredYear)
   ) {
-    selectedYear =
-      savedYear;
+    selectedYear = preferredYear;
+  } else if (years.includes(thisYear)) {
+    selectedYear = thisYear;
   } else {
-    selectedYear =
-      years[0];
+    // Nearest available year to the current year (newer wins a tie).
+    selectedYear = years.reduce((best, y) => {
+      const dy = Math.abs(y - thisYear);
+      const db = Math.abs(best - thisYear);
+      return (dy < db || (dy === db && y > best)) ? y : best;
+    }, years[0]);
   }
 
   yearSelect.value =
@@ -516,16 +516,8 @@ async function loadSelectedFile() {
       String(selectedYear)
     );
 
-    if (
-      currentDate.getFullYear() !==
-      selectedYear
-    ) {
-      currentDate =
-        new Date(
-          selectedYear,
-          0,
-          1
-        );
+    if (currentDate.getFullYear() !== selectedYear) {
+      currentDate = todayInYear(selectedYear);
     } else {
       currentDate =
         clampDateToYear(
@@ -714,28 +706,22 @@ function goNext() {
   updateNavigationButtons();
 }
 
-function goToday() {
-  const today =
-    new Date();
-
-  if (
-    today.getFullYear() ===
-    selectedYear
-  ) {
-    currentDate =
-      new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-  } else {
-    currentDate =
-      new Date(
-        selectedYear,
-        0,
-        1
-      );
+// Today's month and day, placed inside the given year.
+// Example: today is Oct 2, year 2027  ->  Oct 2, 2027.
+// Feb 29 in a year with no Feb 29 becomes Feb 28.
+function todayInYear(year) {
+  const t = new Date();
+  const m = t.getMonth();
+  const d = t.getDate();
+  let c = new Date(year, m, d);
+  if (c.getMonth() !== m) {
+    c = new Date(year, m + 1, 0);
   }
+  return c;
+}
+
+function goToday() {
+  currentDate = todayInYear(selectedYear);
 
   calendarYear =
     selectedYear;
@@ -953,27 +939,7 @@ function nextCalendarMonth() {
 }
 
 function calendarGoToday() {
-  const today =
-    new Date();
-
-  if (
-    today.getFullYear() ===
-    selectedYear
-  ) {
-    currentDate =
-      new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate()
-      );
-  } else {
-    currentDate =
-      new Date(
-        selectedYear,
-        0,
-        1
-      );
-  }
+  currentDate = todayInYear(selectedYear);
 
   calendarYear =
     selectedYear;
@@ -1048,7 +1014,7 @@ async function changeLanguage() {
     selectedLanguage
   );
 
-  populateYearSelect();
+  populateYearSelect(selectedYear);
 
   const availableYears =
     getYearsForLanguage(
@@ -1067,17 +1033,13 @@ async function changeLanguage() {
     return;
   }
 
-  currentDate =
-    new Date(
-      selectedYear,
-      0,
-      1
-    );
+  currentDate = todayInYear(selectedYear);
 
   calendarYear =
     selectedYear;
 
-  calendarMonth = 0;
+  calendarMonth =
+    currentDate.getMonth();
 
   await loadSelectedFile();
 }
@@ -1098,11 +1060,7 @@ async function changeYear() {
     String(selectedYear)
   );
 
-  currentDate =
-    clampDateToYear(
-      currentDate,
-      selectedYear
-    );
+  currentDate = todayInYear(selectedYear);
 
   calendarYear =
     selectedYear;
@@ -1281,27 +1239,7 @@ async function startApp() {
       );
     }
 
-    const today =
-      new Date();
-
-    if (
-      today.getFullYear() ===
-      selectedYear
-    ) {
-      currentDate =
-        new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate()
-        );
-    } else {
-      currentDate =
-        new Date(
-          selectedYear,
-          0,
-          1
-        );
-    }
+    currentDate = todayInYear(selectedYear);
 
     calendarYear =
       selectedYear;
@@ -1339,7 +1277,7 @@ startApp();
 
 const offlineBtn = document.getElementById("offlineBtn");
 const offlineStatus = document.getElementById("offlineStatus");
-const OFFLINE_CACHE = "moravian-watchword-pwa-v4";
+const OFFLINE_CACHE = "moravian-watchword-pwa-v6";
 
 // Hide install button if already running as an installed app.
 if (installBtn &&
@@ -1389,3 +1327,19 @@ if (offlineBtn) offlineBtn.addEventListener("click", downloadForOffline);
 
 window.addEventListener("offline", () => { offlineStatus.textContent = "You are offline. Saved files still work."; });
 window.addEventListener("online", () => { offlineStatus.textContent = ""; });
+
+
+// ------------------------------------------------------------
+// Opened from the blog's Install button (?install=1)
+// ------------------------------------------------------------
+
+if (installBtn && /[?&]install=1(&|$)/.test(location.search)) {
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      if (installBtn.hidden) return;              // already installed
+      installBtn.scrollIntoView({ block: "center", behavior: "smooth" });
+      installBtn.classList.add("attention");
+      if (!deferredInstallPrompt) installBtn.click(); // show the steps (iPhone, Safari, etc.)
+    }, 1200);
+  });
+}
