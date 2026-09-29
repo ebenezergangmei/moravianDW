@@ -1,6 +1,6 @@
 // Moravian Daily Watchwords - offline service worker
 // Bump CACHE_NAME whenever app files change.
-const CACHE_NAME = "moravian-watchword-pwa-v4";
+const CACHE_NAME = "moravian-watchword-pwa-v6";
 
 const APP_SHELL = [
   "./",
