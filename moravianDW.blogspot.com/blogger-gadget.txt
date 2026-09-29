@@ -1,0 +1,551 @@
+<!-- MORAVIAN DAILY WATCHWORDS - BLOGGER HTML/JavaScript GADGET (v4) -->
+<div id="moravian-watchword-gadget-root">
+<style>
+#moravian-watchword-app, #moravian-watchword-app * { box-sizing: border-box; }
+#moravian-watchword-app { width:100%; min-height:100px; text-align:center; font-family:Arial,Helvetica,sans-serif; color:#17233a; }
+#moravian-watchword-app .mw-container { width:100%; max-width:980px; margin:0 auto; padding:0 16px 30px; }
+#moravian-watchword-app .mw-controls-card { width:100%; background:#fff; border:1px solid #e0e3e9; border-radius:16px; box-shadow:0 10px 28px rgba(20,30,50,.08); padding:18px; }
+#moravian-watchword-app .mw-selectors { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+#moravian-watchword-app .mw-label { display:block; margin:0 0 5px; color:#667085; font-size:13px; font-weight:700; }
+#moravian-watchword-app select { width:100%; height:42px; padding:0 10px; border:1px solid #ccd2dc; border-radius:9px; background:#fff; color:#17233a; font-size:15px; text-align:center; text-align-last:center; }
+#moravian-watchword-app button { border:1px solid #ccd2dc; border-radius:9px; background:#fff; color:#111827; font-size:15px; font-weight:700; cursor:pointer; text-align:center; font-family:inherit; }
+#moravian-watchword-app button:disabled { opacity:.45; cursor:default; }
+#moravian-watchword-app .mw-navigation { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
+#moravian-watchword-app .mw-navigation button { width:100%; height:42px; }
+#moravian-watchword-app .mw-today { background:#121826; color:#fff; border-color:#121826; }
+#moravian-watchword-app .mw-tools { display:flex; justify-content:center; align-items:flex-start; gap:12px; margin-top:9px; }
+#moravian-watchword-app .mw-calendar-wrap { position:relative; }
+#moravian-watchword-app .mw-calendar-btn { height:38px; min-width:112px; padding:0 12px; background:#f7f8fa; }
+#moravian-watchword-app .mw-font-controls { display:flex; align-items:center; justify-content:center; gap:8px; }
+#moravian-watchword-app .mw-font-controls button { width:42px; height:38px; padding:0; font-size:22px; }
+#moravian-watchword-app #mw-font-size { min-width:55px; color:#667085; font-size:13px; font-weight:700; }
+#moravian-watchword-app .mw-action-row { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:8px; }
+#moravian-watchword-app .mw-install,
+#moravian-watchword-app .mw-install-app { display:inline-flex; align-items:center; justify-content:center; min-width:160px; height:36px; padding:0 15px; border:1px solid #121826; border-radius:9px; font-size:13px; font-weight:700; text-decoration:none; cursor:pointer; }
+#moravian-watchword-app .mw-install { background:#121826; color:#fff; }
+#moravian-watchword-app .mw-install-app { background:#fff; color:#121826; }
+#moravian-watchword-app .mw-status { padding:8px 5px 2px; color:#667085; font-size:13px; }
+#moravian-watchword-app .mw-status:empty { display:none; }
+#moravian-watchword-app .mw-error { padding:12px; margin-top:10px; background:#fff2f2; border:1px solid #e5a3a3; border-radius:10px; color:#9b1c1c; white-space:pre-wrap; text-align:left; overflow-wrap:anywhere; }
+#moravian-watchword-app .mw-content { width:100%; margin:0 auto; text-align:center; }
+#moravian-watchword-app .mw-entry { width:100%; max-width:900px; margin:10px auto 0; padding:10px 8px 14px; border-top:1px solid #dfe3e8; text-align:center; font-size:var(--mw-reader-size,18px); line-height:1.45; }
+#moravian-watchword-app .mw-line { width:100%; margin:0 auto; min-height:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+#moravian-watchword-app .mw-line + .mw-line { margin-top:12px; }
+#moravian-watchword-app .mw-calendar-panel { position:absolute; z-index:9999; top:44px; left:50%; transform:translateX(-50%); width:315px; max-width:92vw; padding:12px; background:#fff; border:1px solid #d7dce5; border-radius:12px; box-shadow:0 12px 30px rgba(20,30,50,.16); }
+#moravian-watchword-app .mw-calendar-panel[hidden] { display:none; }
+#moravian-watchword-app .mw-cal-top { display:grid; grid-template-columns:38px 1fr 38px; align-items:center; gap:6px; margin-bottom:9px; }
+#moravian-watchword-app .mw-cal-top button { width:38px; height:32px; }
+#moravian-watchword-app .mw-cal-weekdays, #moravian-watchword-app .mw-cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+#moravian-watchword-app .mw-cal-weekdays span { color:#667085; font-size:10px; font-weight:700; padding:4px 0; }
+#moravian-watchword-app .mw-cal-days button { width:100%; height:34px; padding:0; border-radius:7px; font-size:12px; }
+#moravian-watchword-app .mw-cal-empty { height:34px; }
+#moravian-watchword-app .mw-cal-days button.mw-selected { background:#121826; color:#fff; border-color:#121826; }
+#moravian-watchword-app .mw-cal-days button.mw-today-mark { box-shadow:inset 0 0 0 2px #7d8798; }
+#moravian-watchword-app .mw-cal-bottom { margin-top:9px; }
+#moravian-watchword-app .mw-cal-bottom button { width:100%; height:32px; font-size:12px; }
+#moravian-watchword-app .mw-footer { margin-top:25px; color:#667085; font-size:12px; line-height:1.6; }
+#moravian-watchword-app .mw-motto { font-style:italic; }
+#moravian-watchword-app .mw-links { margin-top:6px; }
+#moravian-watchword-app .mw-links a { color:#344054; text-decoration:none; font-weight:700; }
+#moravian-watchword-app .mw-copy { margin-top:6px; }
+#moravian-watchword-app .mw-dialog { position:fixed; inset:0; z-index:100000; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.45); }
+#moravian-watchword-app .mw-dialog.open { display:flex; }
+#moravian-watchword-app .mw-dialog-card { width:min(520px,100%); max-height:90vh; overflow:auto; background:#fff; border-radius:12px; padding:14px 16px; text-align:left; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+#moravian-watchword-app .mw-dialog-card h3 { margin:0 0 7px; padding:0; font-size:18px; line-height:1.2; font-weight:800; }
+#moravian-watchword-app .mw-dialog-card p { margin:5px 0; line-height:1.3; font-size:13px; }
+#moravian-watchword-app .mw-dialog-close { float:right; width:30px; height:30px; margin:-2px -2px 0 8px; padding:0; }
+@media (max-width:680px) {
+  #moravian-watchword-app .mw-selectors { grid-template-columns:1fr; }
+  #moravian-watchword-app .mw-tools { flex-wrap:wrap; }
+  #moravian-watchword-app .mw-container { padding-left:8px; padding-right:8px; }
+}
+
+/* Blogger page cleanup. Only active when HIDE_BLOG_POSTS is true in the script below. */
+body.mw-app-only #Blog1,
+body.mw-app-only .blog-feeds,
+body.mw-app-only .feed-links,
+body.mw-app-only .post-feeds,
+body.mw-app-only .blog-pager { display:none !important; }
+body.mw-app-only #Header1, body.mw-app-only .Header, body.mw-app-only .header { text-align:center !important; }
+body.mw-app-only #Header1 h1, body.mw-app-only #Header1 .title, body.mw-app-only .Header h1, body.mw-app-only .Header .title { text-align:center !important; margin-left:auto !important; margin-right:auto !important; }
+</style>
+
+<div id="moravian-watchword-app">
+  <div class="mw-container">
+    <div class="mw-controls-card">
+      <div class="mw-selectors">
+        <div>
+          <label class="mw-label" for="mw-language">Language</label>
+          <select id="mw-language"><option value="">Loading...</option></select>
+        </div>
+        <div>
+          <label class="mw-label" for="mw-year">Year</label>
+          <select id="mw-year"><option value="">Loading...</option></select>
+        </div>
+      </div>
+
+      <div class="mw-navigation">
+        <button id="mw-prev" type="button">&larr; Previous</button>
+        <button id="mw-today" type="button" class="mw-today">Today</button>
+        <button id="mw-next" type="button">Next &rarr;</button>
+      </div>
+
+      <div class="mw-tools">
+        <div class="mw-calendar-wrap">
+          <button id="mw-calendar-btn" type="button" class="mw-calendar-btn" aria-expanded="false">📅 Calendar</button>
+          <div id="mw-calendar-panel" class="mw-calendar-panel" hidden="hidden">
+            <div class="mw-cal-top">
+              <button id="mw-cal-prev" type="button" aria-label="Previous month">&lsaquo;</button>
+              <strong id="mw-cal-title">Month</strong>
+              <button id="mw-cal-next" type="button" aria-label="Next month">&rsaquo;</button>
+            </div>
+            <div class="mw-cal-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+            <div id="mw-cal-days" class="mw-cal-days"></div>
+            <div class="mw-cal-bottom"><button id="mw-cal-today" type="button">Go to Today</button></div>
+          </div>
+        </div>
+        <div class="mw-font-controls">
+          <button id="mw-font-down" type="button" aria-label="Decrease font size">&minus;</button>
+          <span id="mw-font-size">100%</span>
+          <button id="mw-font-up" type="button" aria-label="Increase font size">+</button>
+        </div>
+      </div>
+
+      <div class="mw-action-row">
+        <a id="mw-open-app" class="mw-install" href="https://ebenezergangmei.github.io/moravianDW/?install=1" target="_blank" rel="noopener noreferrer">📲 Install App</a>
+        <button id="mw-how" type="button" class="mw-install-app">How to Install</button>
+      </div>
+
+      <div id="mw-status" class="mw-status">Reading Watchwords...</div>
+    </div>
+
+    <div id="mw-content" class="mw-content"></div>
+
+    <div class="mw-footer">
+      <div class="mw-motto">&ldquo;In essentials unity, in non-essentials liberty, in all things charity&rdquo;</div>
+      <div class="mw-links">
+        <a href="https://moraviandw.blogspot.com/" target="_blank" rel="noopener noreferrer">WebApps</a> | <a href="https://dailywatchwords.wordpress.com/" target="_blank" rel="noopener noreferrer">Watchwords</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="mw-dialog" class="mw-dialog" role="dialog" aria-modal="true" aria-labelledby="mw-dialog-title">
+    <div class="mw-dialog-card">
+      <button id="mw-dialog-close" class="mw-dialog-close" type="button" aria-label="Close">&times;</button>
+      <h3 id="mw-dialog-title">📲 Install Moravian Watchwords</h3>
+      <p>Tap <strong>Install App</strong>. It opens the full app and shows the install button. Then:</p>
+      <p><strong>Android or desktop Chrome/Edge:</strong> tap <strong>Install App</strong> again in the app and confirm, or use the browser menu and choose <strong>Install app</strong>.</p>
+      <p><strong>iPhone or iPad:</strong> open the app in Safari, tap Share, then <strong>Add to Home Screen</strong>.</p>
+      <p><strong>Airplane mode:</strong> after installing, open the app once online and tap <strong>Download for Offline</strong>.</p>
+      <p>This blog page cannot work offline by itself. Offline use comes from the installed app.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ROOT = document.getElementById('moravian-watchword-app');
+  if (!ROOT) return;
+
+  /* ---------- SETTINGS ---------- */
+  var PAGES_BASE = 'https://ebenezergangmei.github.io/moravianDW/';
+  var RAW_BASE = 'https://raw.githubusercontent.com/ebenezergangmei/moravianDW/main/';
+  // Tries GitHub Pages first, then the raw GitHub address as a backup.
+  var DATA_BASES = [PAGES_BASE + 'data/', RAW_BASE + 'data/'];
+  // true  = hide the normal Blogger posts so this page shows only the app.
+  // false = leave the rest of the blog untouched.
+  var HIDE_BLOG_POSTS = true;
+  /* ------------------------------- */
+
+  if (HIDE_BLOG_POSTS && document.body) document.body.classList.add('mw-app-only');
+
+  // Safe storage: never crashes if the browser blocks storage.
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  function $(id) { return document.getElementById(id); }
+  var languageSelect = $('mw-language'), yearSelect = $('mw-year');
+  var previousBtn = $('mw-prev'), todayBtn = $('mw-today'), nextBtn = $('mw-next');
+  var calendarBtn = $('mw-calendar-btn'), calendarPanel = $('mw-calendar-panel');
+  var calendarPrev = $('mw-cal-prev'), calendarNext = $('mw-cal-next');
+  var calendarTitle = $('mw-cal-title'), calendarDays = $('mw-cal-days'), calendarToday = $('mw-cal-today');
+  var fontDown = $('mw-font-down'), fontUp = $('mw-font-up'), fontLabel = $('mw-font-size');
+  var howBtn = $('mw-how'), statusEl = $('mw-status'), contentEl = $('mw-content');
+  var dialog = $('mw-dialog'), dialogClose = $('mw-dialog-close');
+
+  var STORAGE_LANGUAGE = 'moravianLanguage';
+  var STORAGE_FONT = 'moravianFontScale';
+  var CACHE_LIST = 'moravianGitHubFileListV1';
+  var CACHE_PREFIX = 'moravianGitHubTxtV1:';
+  var MIN_FONT = 80, MAX_FONT = 140, FONT_STEP = 10;
+
+  var availableFiles = [];
+  var selectedLanguage = '';
+  var selectedYear = 0;
+  var records = [];
+  var currentDate = new Date();
+  var calendarMonth = currentDate.getMonth();
+  var calendarYear = currentDate.getFullYear();
+  var fontScale = Number(store.get(STORAGE_FONT)) || 100;
+  var offlineNotice = false;
+
+  /* ---------- helpers ---------- */
+  function status(msg) { statusEl.textContent = msg || ''; }
+  function errorBox(msg) {
+    contentEl.innerHTML = '';
+    var d = document.createElement('div');
+    d.className = 'mw-error';
+    d.textContent = msg;
+    contentEl.appendChild(d);
+  }
+  function daysInYear(y) { return new Date(y, 1, 29).getMonth() === 1 ? 366 : 365; }
+  function dayOfYear(d) {
+    var start = new Date(d.getFullYear(), 0, 1);
+    var cur = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    return Math.round((cur - start) / 86400000) + 1;
+  }
+  function formatDate(d) {
+    return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  // Each "#" line starts one day. Section 1 = January 1.
+  function parseText(text) {
+    var normalized = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    return normalized.split(/^\s*#/m).slice(1).map(function (block) {
+      var lines = block.split('\n');
+      while (lines.length && lines[0].trim() === '') lines.shift();
+      while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+      return { lines: lines };
+    }).filter(function (r) { return r.lines.length > 0; });
+  }
+
+  // File names look like "2027 Hindi.txt"
+  function parseFileInfo(name) {
+    var m = String(name).match(/^(\d{4})\s+(.+?)\.txt$/i);
+    return m ? { name: String(name), year: Number(m[1]), language: m[2].trim() } : null;
+  }
+  function getLanguages() {
+    var a = [];
+    availableFiles.forEach(function (f) {
+      var i = parseFileInfo(f);
+      if (i && a.indexOf(i.language) < 0) a.push(i.language);
+    });
+    return a.sort(function (x, y) { return x.localeCompare(y); });
+  }
+  function getYears(lang) {
+    var a = [];
+    availableFiles.forEach(function (f) {
+      var i = parseFileInfo(f);
+      if (i && i.language === lang && a.indexOf(i.year) < 0) a.push(i.year);
+    });
+    return a.sort(function (x, y) { return x - y; });
+  }
+  function findFile(lang, year) {
+    for (var i = 0; i < availableFiles.length; i++) {
+      var x = parseFileInfo(availableFiles[i]);
+      if (x && x.language === lang && x.year === year) return x.name;
+    }
+    return null;
+  }
+
+  /* ---------- loading ---------- */
+  // Reads a data file, trying each web address in turn.
+  async function fetchData(name) {
+    var lastError = null;
+    for (var i = 0; i < DATA_BASES.length; i++) {
+      var url = DATA_BASES[i] + name;
+      try {
+        var r = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
+        return await r.text();
+      } catch (e) { lastError = e; }
+    }
+    throw lastError || new Error('Could not read ' + name);
+  }
+
+  async function loadFileList() {
+    try {
+      var data = JSON.parse(await fetchData('files.json'));
+      if (!Array.isArray(data)) throw new Error('data/files.json is not a list.');
+      availableFiles = data.map(function (x) {
+        return typeof x === 'string' ? x : (x && x.name ? x.name : null);
+      }).filter(Boolean);
+      store.set(CACHE_LIST, JSON.stringify(availableFiles));
+    } catch (e) {
+      var cached = store.get(CACHE_LIST);
+      if (cached) {
+        try {
+          availableFiles = JSON.parse(cached);
+          offlineNotice = true;
+          status('Could not reach GitHub. Using the last saved file list.');
+          return;
+        } catch (_) {}
+      }
+      throw new Error('Cannot read the Watchword file list.\n\n' + (e && e.message ? e.message : e));
+    }
+  }
+
+  async function loadSelectedFile() {
+    var fileName = findFile(selectedLanguage, selectedYear);
+    if (!fileName) {
+      records = [];
+      errorBox('No Watchword file found for ' + selectedLanguage + ' ' + selectedYear + '.');
+      updateButtons();
+      return false;
+    }
+    status('Reading ' + fileName + '...');
+    try {
+      var text = null;
+      try {
+        text = await fetchData(encodeURIComponent(fileName));
+        store.set(CACHE_PREFIX + fileName, text); // failure to save is ignored
+        offlineNotice = false;
+      } catch (networkError) {
+        text = store.get(CACHE_PREFIX + fileName);
+        if (text === null) throw networkError;
+        offlineNotice = true;
+        status('Could not reach GitHub. Showing the saved copy of ' + fileName + '.');
+      }
+      var parsed = parseText(text);
+      var expected = daysInYear(selectedYear);
+      if (parsed.length !== expected) {
+        throw new Error('The file ' + fileName + ' has ' + parsed.length + ' # sections, but ' + selectedYear + ' needs ' + expected + '.');
+      }
+      records = parsed;
+      if (currentDate.getFullYear() !== selectedYear) currentDate = dateForYear();
+      calendarYear = selectedYear;
+      calendarMonth = currentDate.getMonth();
+      renderCurrent();
+      renderCalendar();
+      updateButtons();
+      if (!offlineNotice) status('');
+      return true;
+    } catch (e) {
+      records = [];
+      errorBox('Could not load the Watchwords:\n\n' + (e && e.message ? e.message : e) + '\n\nIf this is your first visit, please make sure you are online.');
+      status('');
+      updateButtons();
+      return false;
+    }
+  }
+
+  /* ---------- selectors ---------- */
+  function populateLanguages() {
+    var langs = getLanguages();
+    languageSelect.innerHTML = '';
+    langs.forEach(function (l) {
+      var o = document.createElement('option');
+      o.value = l; o.textContent = l;
+      languageSelect.appendChild(o);
+    });
+    if (!langs.length) {
+      languageSelect.innerHTML = '<option value="">No languages</option>';
+      selectedLanguage = '';
+      return;
+    }
+    var saved = store.get(STORAGE_LANGUAGE);
+    selectedLanguage = (saved && langs.indexOf(saved) >= 0) ? saved : langs[0];
+    languageSelect.value = selectedLanguage;
+  }
+
+  // keep = year to stay on when it exists for this language.
+  // Otherwise: this year if available, else the nearest year.
+  function populateYears(keep) {
+    var years = getYears(selectedLanguage);
+    yearSelect.innerHTML = '';
+    years.forEach(function (y) {
+      var o = document.createElement('option');
+      o.value = String(y); o.textContent = String(y);
+      yearSelect.appendChild(o);
+    });
+    if (!years.length) {
+      yearSelect.innerHTML = '<option value="">No years</option>';
+      selectedYear = 0;
+      return;
+    }
+    var thisYear = new Date().getFullYear();
+    if (keep && years.indexOf(keep) >= 0) selectedYear = keep;
+    else if (years.indexOf(thisYear) >= 0) selectedYear = thisYear;
+    else {
+      selectedYear = years.reduce(function (best, y) {
+        var dy = Math.abs(y - thisYear), db = Math.abs(best - thisYear);
+        return (dy < db || (dy === db && y > best)) ? y : best;
+      }, years[0]);
+    }
+    yearSelect.value = String(selectedYear);
+  }
+
+  // Today's month and day, placed inside the selected year.
+  // Example: today is Oct 2 and the year is 2027 -> Oct 2, 2027.
+  // Feb 29 in a year with no Feb 29 becomes Feb 28.
+  function dateForYear() {
+    var t = new Date(), m = t.getMonth(), d = t.getDate();
+    var c = new Date(selectedYear, m, d);
+    if (c.getMonth() !== m) c = new Date(selectedYear, m + 1, 0);
+    return c;
+  }
+
+  // Used when the language or year changes: always show today's date.
+  function keepDate() {
+    currentDate = dateForYear();
+    calendarYear = selectedYear;
+    calendarMonth = currentDate.getMonth();
+  }
+
+  /* ---------- display ---------- */
+  function getCurrentRecord() {
+    if (!records.length || currentDate.getFullYear() !== selectedYear) return null;
+    var i = dayOfYear(currentDate) - 1;
+    return (i >= 0 && i < records.length) ? records[i] : null;
+  }
+  function renderCurrent() {
+    contentEl.innerHTML = '';
+    var rec = getCurrentRecord();
+    if (!rec) { errorBox('No Watchword record found for ' + formatDate(currentDate) + '.'); return; }
+    var entry = document.createElement('div');
+    entry.className = 'mw-entry';
+    rec.lines.forEach(function (line) {
+      var d = document.createElement('div');
+      d.className = 'mw-line';
+      d.textContent = line;
+      entry.appendChild(d);
+    });
+    contentEl.appendChild(entry);
+  }
+  function updateButtons() {
+    if (!records.length) { previousBtn.disabled = true; nextBtn.disabled = true; return; }
+    var d = dayOfYear(currentDate), t = daysInYear(selectedYear);
+    previousBtn.disabled = d <= 1;
+    nextBtn.disabled = d >= t;
+  }
+  function refresh() { renderCurrent(); renderCalendar(); updateButtons(); }
+
+  function goPrev() {
+    if (dayOfYear(currentDate) <= 1) return;
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1);
+    calendarMonth = currentDate.getMonth(); refresh();
+  }
+  function goNext() {
+    if (dayOfYear(currentDate) >= daysInYear(selectedYear)) return;
+    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1);
+    calendarMonth = currentDate.getMonth(); refresh();
+  }
+  function goToday() {
+    currentDate = dateForYear();
+    calendarYear = selectedYear; calendarMonth = currentDate.getMonth(); refresh();
+  }
+
+  /* ---------- calendar ---------- */
+  function renderCalendar() {
+    calendarTitle.textContent = new Date(calendarYear, calendarMonth, 1)
+      .toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    calendarPrev.disabled = calendarMonth <= 0;
+    calendarNext.disabled = calendarMonth >= 11;
+    calendarDays.innerHTML = '';
+    var first = new Date(calendarYear, calendarMonth, 1).getDay();
+    var total = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+    var now = new Date();
+    for (var i = 0; i < first; i++) {
+      var e = document.createElement('div');
+      e.className = 'mw-cal-empty';
+      calendarDays.appendChild(e);
+    }
+    for (var day = 1; day <= total; day++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = String(day);
+      var dt = new Date(calendarYear, calendarMonth, day);
+      if (sameDay(dt, currentDate)) b.classList.add('mw-selected');
+      if (sameDay(dt, now)) b.classList.add('mw-today-mark');
+      b.addEventListener('click', (function (x) {
+        return function () { currentDate = x; refresh(); closeCalendar(); };
+      })(dt));
+      calendarDays.appendChild(b);
+    }
+  }
+  function openCalendar() {
+    calendarPanel.hidden = false;
+    calendarBtn.setAttribute('aria-expanded', 'true');
+    calendarYear = selectedYear; calendarMonth = currentDate.getMonth();
+    renderCalendar();
+  }
+  function closeCalendar() {
+    calendarPanel.hidden = true;
+    calendarBtn.setAttribute('aria-expanded', 'false');
+  }
+  function changeCalendarMonth(delta) {
+    var m = calendarMonth + delta;
+    if (m < 0 || m > 11) return;
+    calendarMonth = m; renderCalendar();
+  }
+
+  /* ---------- font size ---------- */
+  function applyFont() {
+    fontScale = Math.max(MIN_FONT, Math.min(MAX_FONT, fontScale));
+    ROOT.style.setProperty('--mw-reader-size', (18 * fontScale / 100) + 'px');
+    fontLabel.textContent = fontScale + '%';
+    store.set(STORAGE_FONT, String(fontScale));
+  }
+
+  /* ---------- events ---------- */
+  languageSelect.addEventListener('change', async function () {
+    selectedLanguage = languageSelect.value;
+    store.set(STORAGE_LANGUAGE, selectedLanguage);
+    populateYears(selectedYear);
+    keepDate();
+    await loadSelectedFile();
+  });
+  yearSelect.addEventListener('change', async function () {
+    selectedYear = Number(yearSelect.value);
+    keepDate();
+    await loadSelectedFile();
+  });
+  previousBtn.addEventListener('click', goPrev);
+  nextBtn.addEventListener('click', goNext);
+  todayBtn.addEventListener('click', goToday);
+  calendarBtn.addEventListener('click', function () { if (calendarPanel.hidden) openCalendar(); else closeCalendar(); });
+  calendarPrev.addEventListener('click', function () { changeCalendarMonth(-1); });
+  calendarNext.addEventListener('click', function () { changeCalendarMonth(1); });
+  calendarToday.addEventListener('click', function () { goToday(); closeCalendar(); });
+  document.addEventListener('click', function (e) {
+    if (!calendarPanel.hidden && !e.target.closest('.mw-calendar-wrap')) closeCalendar();
+  });
+  fontDown.addEventListener('click', function () { fontScale -= FONT_STEP; applyFont(); });
+  fontUp.addEventListener('click', function () { fontScale += FONT_STEP; applyFont(); });
+  howBtn.addEventListener('click', function () { dialog.classList.add('open'); });
+  dialogClose.addEventListener('click', function () { dialog.classList.remove('open'); });
+  dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.classList.remove('open'); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { dialog.classList.remove('open'); closeCalendar(); }
+  });
+
+  /* ---------- start ---------- */
+  async function start() {
+    try {
+      applyFont();
+      status('Reading the Watchword list...');
+      await loadFileList();
+      populateLanguages();
+      populateYears();
+      if (!selectedLanguage || !selectedYear) throw new Error('No valid language or year was found in data/files.json.');
+      currentDate = dateForYear();
+      calendarYear = selectedYear;
+      calendarMonth = currentDate.getMonth();
+      await loadSelectedFile();
+    } catch (e) {
+      errorBox('Could not start the Watchword app.\n\n' + (e && e.message ? e.message : e));
+      status('');
+    }
+  }
+  start();
+})();
+</script>
+
+</div>
