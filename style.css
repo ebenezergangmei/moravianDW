@@ -486,3 +486,9 @@ button:disabled { opacity: 0.45; cursor: default; }
   margin-top: 6px;
   font-size: 12px;
 }
+
+.install-button.attention { animation: installPulse 1.2s ease-in-out 3; }
+@keyframes installPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(18, 24, 38, 0.5); }
+  50% { box-shadow: 0 0 0 10px rgba(18, 24, 38, 0); }
+}
