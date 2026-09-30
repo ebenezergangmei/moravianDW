@@ -415,6 +415,18 @@ button:disabled { opacity: 0.45; cursor: default; }
   .container { margin: 7px auto 0; padding: 0 6px 25px; }
 
   .controls-card { padding: 7px; border-radius: 9px; box-shadow: none; }
+      .info-links {
+      margin: -7px auto 8px;
+      gap: 5px;
+      }
+  
+      .info-links a {
+        min-width: 82px;
+        height: 25px;
+        padding: 0 9px;
+        border-radius: 0 0 7px 7px;
+        font-size: 10px;
+        }
 
   .selectors { grid-template-columns: 1fr 1fr; gap: 5px; }
 
