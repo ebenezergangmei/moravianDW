@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header class="site-header">
   <h1>Moravian Daily Watchwords</h1>
 
@@ -23,29 +24,21 @@
        class="header-logo">
 
   <p class="header-tagline">Multilingual Daily Texts</p>
-
-  <div class="info-links">
-    <a href="info/history.txt" target="_blank" rel="noopener noreferrer">
-      History
-    </a>
-    <span>|</span>
-    <a href="info/watchwords.txt" target="_blank" rel="noopener noreferrer">
-      Watchwords
-    </a>
-  </div>
 </header>
 
   <main class="container">
     <section class="controls-card">
+
       <div class="info-links">
-                <a href="info/history.txt" target="_blank" rel="noopener noreferrer">
-                  History
-                </a>
-              
-                <a href="info/watchwords.txt" target="_blank" rel="noopener noreferrer">
-                  Watchword
-                </a>
-       </div>
+        <button type="button" onclick="openInfo('history')">
+          History
+        </button>
+
+        <button type="button" onclick="openInfo('watchwords')">
+          Watchword
+        </button>
+      </div>
+
       <div class="selectors">
         <div class="selector-group">
           <label for="language">Language</label>
@@ -117,6 +110,22 @@
       <div id="status" class="status">Loading Watchword files...</div>
     </section>
 
+    <!-- History / Watchword popup -->
+    <div id="infoPopup" class="info-popup" hidden>
+      <div class="info-popup-box">
+
+        <button
+          type="button"
+          class="info-close"
+          onclick="closeInfo()"
+          aria-label="Close"
+        >×</button>
+
+        <div id="infoPopupContent">Loading...</div>
+
+      </div>
+    </div>
+
     <section id="watchwordContent" class="watchword-content"></section>
   </main>
 
@@ -131,5 +140,44 @@
   </footer>
 
   <script src="app.js"></script>
+
+  <script>
+    async function openInfo(type) {
+      const popup = document.getElementById("infoPopup");
+      const content = document.getElementById("infoPopupContent");
+
+      const file =
+        type === "history"
+          ? "info/history.txt"
+          : "info/watchwords.txt";
+
+      popup.hidden = false;
+      content.textContent = "Loading...";
+
+      try {
+        const response = await fetch(file);
+
+        if (!response.ok) {
+          throw new Error("Could not load information.");
+        }
+
+        content.textContent = await response.text();
+
+      } catch (error) {
+        content.textContent = "Unable to load this information.";
+      }
+    }
+
+    function closeInfo() {
+      document.getElementById("infoPopup").hidden = true;
+    }
+
+    document.getElementById("infoPopup").addEventListener("click", function(event) {
+      if (event.target === this) {
+        closeInfo();
+      }
+    });
+  </script>
+
 </body>
 </html>
