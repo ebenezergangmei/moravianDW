@@ -63,6 +63,42 @@ body {
   text-align: center;
 }
 
+.info-links {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  margin: -18px auto 14px;
+  position: relative;
+  z-index: 2;
+}
+
+.info-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 105px;
+  height: 32px;
+  padding: 0 14px;
+
+  background: #ffffff;
+  border: 1px solid #e0e3e9;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+
+  color: #17233a;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+
+  box-shadow: 0 4px 8px rgba(20, 30, 50, 0.06);
+}
+
+.info-links a:hover {
+  background: #f7f8fa;
+}
+
 .selectors {
   width: 100%;
   max-width: 900px;
